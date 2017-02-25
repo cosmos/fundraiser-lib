@@ -1,9 +1,14 @@
 'use strict'
 
-const { randomBytes } = require('crypto')
+const randomBytes = require('randombytes')
 const createHash = require('create-hash')
+const {
+  createCipheriv,
+  createDecipheriv
+} = require('browserify-cipher')
 const createKeccakHash = require('keccak')
 const secp256k1 = require('secp256k1')
+const pbkdf2 = require('pbkdf2').pbkdf2Sync
 const bs58check = require('bs58check')
 
 function sha3 (data) {
@@ -69,9 +74,36 @@ function deriveAddresses (pub, testnet = false) {
   return { cosmos, bitcoin, ethereum }
 }
 
+function deriveEncryptionKey (password, salt) {
+  return pbkdf2(password, salt, 10000, 32, 'sha512')
+}
+
+function encryptSeed (seed, password) {
+  let salt = randomBytes(32)
+  let key = deriveEncryptionKey(password, salt)
+  let iv = randomBytes(16)
+  let cipher = createCipheriv('aes-256-cbc', key, iv)
+  let encryptedSeed = concat(
+    cipher.update(seed),
+    cipher.final()
+  )
+  return { encryptedSeed, salt, iv }
+}
+
+function decryptSeed ({ encryptedSeed, salt, iv }, password) {
+  let key = deriveEncryptionKey(password, salt)
+  let decipher = createDecipheriv('aes-256-cbc', key, iv)
+  return concat(
+    decipher.update(encryptedSeed),
+    decipher.final()
+  )
+}
+
 module.exports = {
   generateSeed,
   derivePrivateKeys,
   derivePublicKeys,
-  deriveAddresses
+  deriveAddresses,
+  encryptSeed,
+  decryptSeed
 }

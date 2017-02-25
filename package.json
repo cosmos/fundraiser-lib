@@ -15,8 +15,11 @@
   "author": "Matt Bell <mappum@gmail.com>",
   "license": "Apache 2.0",
   "dependencies": {
+    "browserify-cipher": "^1.0.0",
     "bs58check": "^2.0.1",
     "create-hash": "^1.1.2",
-    "keccak": "^1.2.0"
+    "keccak": "^1.2.0",
+    "randombytes": "^2.0.3",
+    "secp256k1": "^3.2.5"
   }
 }
