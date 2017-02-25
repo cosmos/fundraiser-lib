@@ -1,0 +1,22 @@
+{
+  "name": "cosmos-fundraiser",
+  "version": "1.0.0",
+  "description": "Tools for the Cosmos Fundraiser",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cosmos",
+    "tendermint",
+    "blockchain",
+    "atoms"
+  ],
+  "author": "Matt Bell <mappum@gmail.com>",
+  "license": "Apache 2.0",
+  "dependencies": {
+    "bs58check": "^2.0.1",
+    "create-hash": "^1.1.2",
+    "keccak": "^1.2.0"
+  }
+}
