@@ -16,6 +16,13 @@ function generateSeed () {
   return randomBytes(32)
 }
 
+function deriveWallet (seed) {
+  let privateKeys = derivePrivateKeys(seed)
+  let publicKeys = derivePublicKeys(privateKeys)
+  let addresses = deriveAddresses(publicKeys)
+  return { privateKeys, publicKeys, addresses }
+}
+
 function derivePrivateKeys (seed) {
   if (seed.length < 32) {
     throw Error('Seed must be at least 32 bytes')
@@ -71,9 +78,7 @@ function decryptSeed ({ encryptedSeed, salt, iv }, password) {
 
 module.exports = {
   generateSeed,
-  derivePrivateKeys,
-  derivePublicKeys,
-  deriveAddresses,
+  deriveWallet,
   encryptSeed,
   decryptSeed
 }
