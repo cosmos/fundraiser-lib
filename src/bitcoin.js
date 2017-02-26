@@ -24,11 +24,11 @@ function blockrRequest (url, { testnet }, cb) {
   })
 }
 
-function fetchTransactions (address, opts, cb) {
-  blockrRequest(`address/txs/${address}`, opts, cb)
+function fetchUnspent (address, opts, cb) {
+  blockrRequest(`address/unspent/${address}`, opts, cb)
 }
 
 module.exports = {
   getAddress,
-  fetchTransactions
+  fetchUnspent
 }
