@@ -16,10 +16,10 @@ function generateSeed () {
   return randomBytes(32)
 }
 
-function deriveWallet (seed) {
+function deriveWallet (seed, testnet = false) {
   let privateKeys = derivePrivateKeys(seed)
   let publicKeys = derivePublicKeys(privateKeys)
-  let addresses = deriveAddresses(publicKeys)
+  let addresses = deriveAddresses(publicKeys, testnet)
   return { privateKeys, publicKeys, addresses }
 }
 

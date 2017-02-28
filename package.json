@@ -15,6 +15,7 @@
   "author": "Matt Bell <mappum@gmail.com>",
   "license": "Apache 2.0",
   "dependencies": {
+    "bitcoinjs-lib": "^2.3.0",
     "browser-request": "^0.3.3",
     "browserify-cipher": "^1.0.0",
     "bs58check": "^2.0.1",
