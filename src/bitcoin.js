@@ -8,7 +8,8 @@ const { byte, concat } = require('./util.js')
 const COSMOS_OUTPUT_AMOUNT = 10000 // 10k satoshis
 const EXODUS_ADDRESS = 'mvPBr7EqiAn41Hqs9Du8ovNFKveU1sdecX'
 const FEE_RATE = 220 // satoshis per byte
-const MINIMUM_AMOUNT = 10000 // min satoshis to send to exodus
+const MINIMUM_AMOUNT = 1000000 // min satoshis to send to exodus
+const ATOMS_PER_BTC = 2000
 
 const exodusPkh = bs58check.decode(EXODUS_ADDRESS).slice(1)
 
@@ -90,7 +91,7 @@ function pushTx (tx, opts, cb) {
   blockrRequest('POST', `tx/push`, opts, cb).end(txJson)
 }
 
-function finalize (wallet, intermediateTx, opts, cb) {
+function createFinalTx (wallet, intermediateTx) {
   let tx = new Transaction()
 
   // add inputs from intermediate tx
@@ -110,30 +111,31 @@ function finalize (wallet, intermediateTx, opts, cb) {
   // deduct fee from exodus output
   let feeAmount = tx.byteLength() * FEE_RATE
   if (tx.outs[0].value < MINIMUM_AMOUNT) {
-    return cb(Error(`Not enough coins given to pay fee.
+    throw Error(`Not enough coins given to pay fee.
       tx length=${tx.byteLength()}
       fee rate=${FEE_RATE} satoshi/byte
       fee amount=${feeAmount} satoshis
-      output amount=${tx.outs[0].value} satoshis`))
+      output amount=${tx.outs[0].value} satoshis`)
   }
   tx.outs[0].value -= feeAmount
 
   // sign inputs
+  let privKey = wallet.privateKeys.bitcoin
+  let pubKey = wallet.publicKeys.bitcoin
   for (let i = 0; i < tx.ins.length; i++) {
     let input = tx.ins[i]
     let prevOut = intermediateTx.tx.outs[input.index]
     let sigHash = tx.hashForSignature(i, prevOut.script, Transaction.SIGHASH_ALL)
-    let privKey = wallet.privateKeys.bitcoin
     let { signature } = secp256k1.sign(sigHash, privKey)
     signature = secp256k1.signatureNormalize(signature) // enforce low-S
     signature = secp256k1.signatureExport(signature) // convert to DER encoding
-    signature = concat(signature, byte(Transaction.SIGHASH_ALL)) // add sighash type
-    let pubKey = wallet.publicKeys.bitcoin
+    signature = concat(signature, byte(Transaction.SIGHASH_ALL)) // add sighash byte
     input.script = script.pubKeyHashInput(signature, pubKey)
   }
 
-  // broadcast tx!
-  pushTx(tx, opts, cb)
+  let paidAmount = intermediateTx.amount
+  let atomAmount = (tx.outs[0].value * ATOMS_PER_BTC) / 1e8
+  return { tx, paidAmount, feeAmount, atomAmount }
 }
 
 module.exports = {
@@ -142,5 +144,7 @@ module.exports = {
   fetchTx,
   pushTx,
   waitForTx,
-  finalize
+  createFinalTx,
+  MINIMUM_AMOUNT,
+  ATOMS_PER_BTC
 }
