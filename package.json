@@ -26,6 +26,7 @@
     "create-hash": "^1.1.2",
     "keccak": "^1.2.0",
     "old": "^0.2.0",
+    "pbkdf2": "^3.0.9",
     "randombytes": "^2.0.3",
     "request": "^2.79.0",
     "secp256k1": "^3.2.5"
