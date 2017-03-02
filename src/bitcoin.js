@@ -11,6 +11,7 @@ const FEE_RATE = 220 // satoshis per byte
 const MINIMUM_AMOUNT = 1000000 // min satoshis to send to exodus
 const ATOMS_PER_BTC = 2000
 
+// exodus pubkey hash
 const exodusPkh = bs58check.decode(EXODUS_ADDRESS).slice(1)
 
 function getAddress (pub, testnet = false) {
@@ -125,17 +126,22 @@ function createFinalTx (wallet, intermediateTx) {
   for (let i = 0; i < tx.ins.length; i++) {
     let input = tx.ins[i]
     let prevOut = intermediateTx.tx.outs[input.index]
-    let sigHash = tx.hashForSignature(i, prevOut.script, Transaction.SIGHASH_ALL)
-    let { signature } = secp256k1.sign(sigHash, privKey)
-    signature = secp256k1.signatureNormalize(signature) // enforce low-S
-    signature = secp256k1.signatureExport(signature) // convert to DER encoding
-    signature = concat(signature, byte(Transaction.SIGHASH_ALL)) // add sighash byte
+    let sigHashType = Transaction.SIGHASH_ALL
+    let sigHash = tx.hashForSignature(i, prevOut.script, sigHashType)
+    let signature = sign(privKey, sigHash)
+    signature = concat(signature, byte(sigHashType)) // append sighash type byte
     input.script = script.pubKeyHashInput(signature, pubKey)
   }
 
   let paidAmount = intermediateTx.amount
   let atomAmount = (tx.outs[0].value * ATOMS_PER_BTC) / 1e8
   return { tx, paidAmount, feeAmount, atomAmount }
+}
+
+function sign (privKey, sigHash) {
+  let { signature } = secp256k1.sign(sigHash, privKey)
+  signature = secp256k1.signatureNormalize(signature) // enforce low-S
+  return secp256k1.signatureExport(signature) // convert to DER encoding
 }
 
 module.exports = {
