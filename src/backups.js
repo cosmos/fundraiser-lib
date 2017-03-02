@@ -31,7 +31,7 @@ class Client {
 
   register (user, cb) { this.post('/register', user, cb) }
   login (user, cb) { this.post('/login', user, cb) }
-  logout (cb) { this.post('/logout', null, cb) }
+  logout (cb) { this.post('/logout', {}, cb) }
   getUser (cb) { this.get('/user', cb) }
   getWallets (cb) { this.get('/wallets', cb) }
   getTransactions (cb) { this.get('/transactions', cb) }
