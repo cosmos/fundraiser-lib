@@ -14,12 +14,14 @@ class Client {
       method,
       url: this.uri + url,
       json: data || true,
-      jar: true // keep cookies
+      jar: true, // keep cookies
+      withCredentials: true
     }, (err, res, data) => {
       if (err) return cb(err)
       if (res.statusCode !== 200) {
-        let error = String(data.error || data)
-        return cb(Error(`${res.statusCode} ${error}`))
+        let error = Error(String(data.error || data))
+        error.code = res.statusCode
+        return cb(error)
       }
       cb(null, data)
     })
@@ -30,6 +32,7 @@ class Client {
   register (user, cb) { this.post('/register', user, cb) }
   login (user, cb) { this.post('/login', user, cb) }
   logout (cb) { this.post('/logout', null, cb) }
+  getUser (cb) { this.get('/user', cb) }
   getWallets (cb) { this.get('/wallets', cb) }
   getTransactions (cb) { this.get('/transactions', cb) }
   backupWallet (wallet, cb) {
