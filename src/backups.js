@@ -46,6 +46,9 @@ class Client {
   register (user, cb) { this.post('/register', user, cb) }
   login (user, cb) { this.post('/login', user, cb) }
   logout (cb) { this.post('/logout', {}, cb) }
+  updateName (name, cb) { this.post('/name', { name }, cb) }
+  updateEmail (email, cb) { this.post('/email', { email }, cb) }
+  updatePassword (password, cb) { this.post('/password', { password }, cb) }
   getUser (cb) {
     this.get('/user', (err, user) => {
       if (err) return cb(err)
