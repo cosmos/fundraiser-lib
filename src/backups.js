@@ -3,6 +3,20 @@
 const request = require('request')
 const old = require('old')
 
+function convertWallet (wallet) {
+  return {
+    encryptedSeed: Buffer(wallet.encryptedSeed, 'base64'),
+    salt: Buffer(wallet.salt, 'base64'),
+    iv: Buffer(wallet.iv, 'base64')
+  }
+}
+
+function convertTransaction (tx) {
+  return Object.assign(tx, {
+    txid: Buffer(tx.txid, 'base64')
+  })
+}
+
 // client for the fundraiser REST API, for backing up wallets
 class Client {
   constructor (uri) {
@@ -32,9 +46,26 @@ class Client {
   register (user, cb) { this.post('/register', user, cb) }
   login (user, cb) { this.post('/login', user, cb) }
   logout (cb) { this.post('/logout', {}, cb) }
-  getUser (cb) { this.get('/user', cb) }
-  getWallets (cb) { this.get('/wallets', cb) }
-  getTransactions (cb) { this.get('/transactions', cb) }
+  getUser (cb) {
+    this.get('/user', (err, user) => {
+      if (err) return cb(err)
+      user.transactions = user.transactions.map(convertTransaction)
+      user.wallets = user.wallets.map(convertWallet)
+      cb(null, user)
+    })
+  }
+  getWallets (cb) {
+    this.get('/wallets', (err, wallets) => {
+      if (err) return cb(err)
+      cb(null, wallets.map(convertWallet))
+    })
+  }
+  getTransactions (cb) {
+    this.get('/transactions', (err, transactions) => {
+      if (err) return cb(err)
+      cb(null, transactions.map(convertTransaction))
+    })
+  }
   backupWallet (wallet, cb) {
     wallet = {
       encryptedSeed: wallet.encryptedSeed.toString('base64'),
