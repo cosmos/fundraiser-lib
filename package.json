@@ -1,6 +1,6 @@
 {
   "name": "cosmos-fundraiser",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "Tools for the Cosmos Fundraiser",
   "main": "index.js",
   "scripts": {
