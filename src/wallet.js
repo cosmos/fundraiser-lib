@@ -7,10 +7,17 @@ const {
 } = require('browserify-cipher')
 const secp256k1 = require('secp256k1')
 const pbkdf2 = require('pbkdf2').pbkdf2Sync
+const struct = require('varstruct')
 const Bitcoin = require('./bitcoin.js')
 const Ethereum = require('./ethereum.js')
 const { sha3, ripemd160 } = require('./hash.js')
 const { concat, byte } = require('./util.js')
+
+const Wallet = struct([
+  { name: 'encryptedSeed', type: struct.VarBuffer(struct.Byte) },
+  { name: 'salt', type: struct.VarBuffer(struct.Byte) },
+  { name: 'iv', type: struct.VarBuffer(struct.Byte) }
+])
 
 function generateSeed () {
   return randomBytes(32)
@@ -76,9 +83,19 @@ function decryptSeed ({ encryptedSeed, salt, iv }, password) {
   )
 }
 
+function encodeWallet (wallet) {
+  return Wallet.encode(wallet)
+}
+
+function decodeWallet (bytes) {
+  return Wallet.decode(bytes)
+}
+
 module.exports = {
   generateSeed,
   deriveWallet,
   encryptSeed,
-  decryptSeed
+  decryptSeed,
+  encodeWallet,
+  decodeWallet
 }
