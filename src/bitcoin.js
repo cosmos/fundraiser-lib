@@ -5,11 +5,11 @@ const secp256k1 = require('secp256k1')
 const { sha2, ripemd160 } = require('./hash.js')
 const { byte, concat } = require('./util.js')
 
-const COSMOS_OUTPUT_AMOUNT = 10000 // 10k satoshis
 const EXODUS_ADDRESS = 'mvPBr7EqiAn41Hqs9Du8ovNFKveU1sdecX'
 const FEE_RATE = 220 // satoshis per byte
 const MINIMUM_AMOUNT = 1000000 // min satoshis to send to exodus
 const ATOMS_PER_BTC = 2000
+const MINIMUM_OUTPUT = 1000
 
 // exodus pubkey hash
 const exodusPkh = bs58check.decode(EXODUS_ADDRESS).slice(1)
@@ -20,12 +20,12 @@ function getAddress (pub, testnet = false) {
   return address.fromOutputScript(outputScript, network)
 }
 
-function blockrRequest (method, url, { testnet }, cb) {
+function blockrRequest (method, url, { testnet }, data, cb) {
   let network = testnet ? 'tbtc' : 'btc'
   return request({
     method,
     url: `https://${network}.blockr.io/api/v1/${url}`,
-    json: true
+    json: data || true
   }, (err, res, body) => {
     if (err) return cb(err)
     if (body.status !== 'success') {
@@ -36,11 +36,11 @@ function blockrRequest (method, url, { testnet }, cb) {
 }
 
 function fetchUnspent (address, opts, cb) {
-  blockrRequest('GET', `address/unspent/${address}?unconfirmed=1`, opts, cb)
+  blockrRequest('GET', `address/unspent/${address}?unconfirmed=1`, opts, null, cb)
 }
 
 function fetchTx (hash, opts, cb) {
-  blockrRequest('GET', `tx/raw/${hash}`, opts, (err, res) => {
+  blockrRequest('GET', `tx/raw/${hash}`, opts, null, (err, res) => {
     if (err) return cb(err)
     cb(null, Transaction.fromHex(res.tx.hex))
   })
@@ -71,7 +71,7 @@ function waitForTx (address, opts, cb) {
 function isSpendable (output, address) {
   let isPkh = script.classifyOutput(output.script) === 'pubkeyhash'
   let pkh = bs58check.decode(address).slice(1)
-  let key = script.decompile(output.script)[2]
+  let key = Buffer(script.decompile(output.script)[2])
   let paysToAddress = key.equals(pkh)
   return isPkh && paysToAddress
 }
@@ -88,11 +88,17 @@ function getTxInfo (tx, address) {
 }
 
 function pushTx (tx, opts, cb) {
-  let txJson = JSON.stringify({ hex: tx.toHex() })
-  blockrRequest('POST', `tx/push`, opts, cb).end(txJson)
+  let txJson = { hex: tx.toHex() }
+  blockrRequest('POST', `tx/push`, opts, txJson, cb)
 }
 
 function createFinalTx (wallet, intermediateTx) {
+  if (intermediateTx.amount < MINIMUM_AMOUNT) {
+    throw Error(`Intermediate tx is smaller than minimum.
+      minimum=${MINIMUM_AMOUNT}
+      actual=${intermediateTx.amount}`)
+  }
+
   let tx = new Transaction()
 
   // add inputs from intermediate tx
@@ -103,15 +109,16 @@ function createFinalTx (wallet, intermediateTx) {
 
   // pay to exodus address, spendable by Cosmos developers
   let payToExodus = script.pubKeyHashOutput(exodusPkh)
-  tx.addOutput(payToExodus, intermediateTx.amount - COSMOS_OUTPUT_AMOUNT)
+  tx.addOutput(payToExodus, intermediateTx.amount)
 
   // OP_RETURN data output to specify user's Cosmos address
+  // this output has a value of 0
   let specifyCosmosAddress = script.nullDataOutput(Buffer(wallet.addresses.cosmos, 'hex'))
-  tx.addOutput(specifyCosmosAddress, COSMOS_OUTPUT_AMOUNT)
+  tx.addOutput(specifyCosmosAddress, 0)
 
   // deduct fee from exodus output
   let feeAmount = tx.byteLength() * FEE_RATE
-  if (tx.outs[0].value < MINIMUM_AMOUNT) {
+  if (tx.outs[0].value < MINIMUM_OUTPUT) {
     throw Error(`Not enough coins given to pay fee.
       tx length=${tx.byteLength()}
       fee rate=${FEE_RATE} satoshi/byte
