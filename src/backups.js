@@ -81,6 +81,15 @@ class Client {
     tx.txid = tx.txid.toString('base64')
     this.post('/transaction', tx, cb)
   }
+
+  // for testnet transactions only, for other transactions use
+  // blockchain.info pushtx
+  pushTx (tx, cb) {
+    if (process.env.NODE_ENV !== 'development') {
+      throw Error('pushTx is only for testnet transactions')
+    }
+    this.post('/pushtx', { hex: tx.toHex() }, cb)
+  }
 }
 
 module.exports = old(Client)
