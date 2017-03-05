@@ -11,12 +11,6 @@ function convertWallet (wallet) {
   }
 }
 
-function convertTransaction (tx) {
-  return Object.assign(tx, {
-    txid: Buffer(tx.txid, 'base64')
-  })
-}
-
 // client for the fundraiser REST API, for backing up wallets
 class Client {
   constructor (uri) {
@@ -52,7 +46,6 @@ class Client {
   getUser (cb) {
     this.get('/user', (err, user) => {
       if (err) return cb(err)
-      user.transactions = user.transactions.map(convertTransaction)
       user.wallets = user.wallets.map(convertWallet)
       cb(null, user)
     })
@@ -63,12 +56,6 @@ class Client {
       cb(null, wallets.map(convertWallet))
     })
   }
-  getTransactions (cb) {
-    this.get('/transactions', (err, transactions) => {
-      if (err) return cb(err)
-      cb(null, transactions.map(convertTransaction))
-    })
-  }
   backupWallet (wallet, cb) {
     wallet = {
       encryptedSeed: wallet.encryptedSeed.toString('base64'),
@@ -76,10 +63,6 @@ class Client {
       iv: wallet.iv.toString('base64')
     }
     this.post('/wallet', wallet, cb)
-  }
-  submitTx (tx, cb) {
-    tx.txid = tx.txid.toString('base64')
-    this.post('/transaction', tx, cb)
   }
 
   // for testnet transactions only, for other transactions use
