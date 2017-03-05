@@ -1,7 +1,6 @@
 const bs58check = require('bs58check')
 const { Transaction, script, address } = require('bitcoinjs-lib')
-const bci = require('blockchain.info/blockexplorer')
-bci.pushTx = require('blockchain.info/pushtx').pushtx
+const request = require('request')
 const secp256k1 = require('secp256k1')
 const reverse = require('buffer-reverse')
 const { sha2, ripemd160 } = require('./hash.js')
@@ -25,16 +24,24 @@ function getAddress (pub) {
   return address.fromOutputScript(outputScript)
 }
 
-// call a callback from a Promise
-function cbify (promise, cb) {
-  promise
-    .then((res) => cb(null, res))
-    .catch((err) => cb(err))
+function bciRequest (method, url, data, cb) {
+  return request({
+    method,
+    url: `https://blockchain.info/${url}`,
+    qs: { format: 'json', cors: true },
+    json: true,
+    form: data
+  }, (err, res, body) => {
+    if (err || res.statusCode !== 200) {
+      return cb(err || Error(res.statusCode))
+    }
+    cb(null, body)
+  })
 }
 
 // fetch all utxos for this address
 function fetchUtxos (address, cb) {
-  cbify(bci.getAddress(address), (err, res) => {
+  bciRequest('GET', `address/${address}`, null, (err, res) => {
     // results from bc.i are paginated and we are only
     // getting the first page, so we're assuming nobody is
     // going to send 50+ txs
@@ -72,7 +79,7 @@ function waitForPayment (address, cb) {
 }
 
 function pushTx (tx, cb) {
-  cbify(bci.pushTx(tx.toHex()), cb)
+  bciRequest('POST', 'pushtx', { tx: tx.toHex() }, cb)
 }
 
 function createFinalTx (wallet, inputs) {
