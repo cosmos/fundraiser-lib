@@ -2,7 +2,6 @@ const bs58check = require('bs58check')
 const { Transaction, script, address } = require('bitcoinjs-lib')
 const request = require('request')
 const secp256k1 = require('secp256k1')
-const reverse = require('buffer-reverse')
 const { sha2, ripemd160 } = require('./hash.js')
 const { byte, concat } = require('./util.js')
 
@@ -28,36 +27,33 @@ function bciRequest (method, url, data, cb) {
   return request({
     method,
     url: `https://blockchain.info/${url}`,
-    qs: { format: 'json', cors: true },
-    json: true,
+    qs: { cors: true },
     form: data
   }, (err, res, body) => {
     if (err || res.statusCode !== 200) {
-      return cb(err || Error(res.statusCode))
+      return cb(err || Error(res.statusCode), body)
     }
+    try {
+      body = JSON.parse(body)
+    } catch (err) {}
     cb(null, body)
   })
 }
 
 // fetch all utxos for this address
 function fetchUtxos (address, cb) {
-  bciRequest('GET', `address/${address}`, null, (err, res) => {
-    // results from bc.i are paginated and we are only
-    // getting the first page, so we're assuming nobody is
-    // going to send 50+ txs
-    if (err) return cb(err)
-    let utxos = []
-    let amount = 0
-    for (let tx of res.txs) {
-      for (let output of tx.out) {
-        if (output.spent) continue
-        if (output.addr !== address) continue
-        amount += output.value
-        output.txid = tx.hash
-        utxos.push(output)
-      }
+  bciRequest('GET', `unspent?active=${address}`, null, (err, res) => {
+    // when there are no outputs for this address,
+    // blockchain API gives error 500 with this message:
+    if (err && res === 'No free outputs to spend') {
+      return cb(null, { utxos: [], amount: 0 })
     }
-    cb(null, { utxos, amount })
+    if (err) return cb(err)
+    let amount = 0
+    for (let utxo of res.unspent_outputs) {
+      amount += utxo.value
+    }
+    cb(null, { utxos: res.unspent_outputs, amount })
   })
 }
 
@@ -92,11 +88,9 @@ function createFinalTx (wallet, inputs) {
   let tx = new Transaction()
 
   // add inputs from intermediate tx
-  let inputMap = {}
   for (let output of inputs.utxos) {
-    let txid = reverse(Buffer(output.txid, 'hex'))
-    tx.addInput(txid, output.n)
-    inputMap[`${output.txid}:${output.n}`] = output
+    let txid = Buffer(output.tx_hash, 'hex')
+    tx.addInput(txid, output.tx_output_n)
   }
 
   // pay to exodus address, spendable by Cosmos developers
