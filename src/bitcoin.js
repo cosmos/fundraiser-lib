@@ -1,4 +1,3 @@
-const bs58check = require('bs58check')
 const { Transaction, script, address } = require('bitcoinjs-lib')
 const request = require('request')
 const secp256k1 = require('secp256k1')
@@ -11,11 +10,6 @@ const FEE_RATE = 220 // satoshis per byte
 const MINIMUM_AMOUNT = DEV ? 60000 : 1000000 // min satoshis to send to exodus
 const ATOMS_PER_BTC = 2000
 const MINIMUM_OUTPUT = 1000
-
-// exodus pubkey hash
-// TODO: exodus should be P2Sh
-// TODO: address prefix byte sanity check
-const exodusPkh = bs58check.decode(EXODUS_ADDRESS).slice(1)
 
 function getAddress (pub) {
   let pubkeyHash = ripemd160(sha2(pub))
@@ -94,8 +88,7 @@ function createFinalTx (wallet, inputs) {
   }
 
   // pay to exodus address, spendable by Cosmos developers
-  // TODO: exodus should be P2SH
-  let payToExodus = script.pubKeyHashOutput(exodusPkh)
+  let payToExodus = address.toOutputScript(EXODUS_ADDRESS)
   tx.addOutput(payToExodus, inputs.amount)
 
   // output to specify user's Cosmos address
@@ -105,7 +98,7 @@ function createFinalTx (wallet, inputs) {
 
   // deduct fee from exodus output
   let feeAmount = tx.byteLength() * FEE_RATE
-  if (tx.outs[0].value < MINIMUM_OUTPUT) {
+  if ((tx.outs[0].value - feeAmount) < MINIMUM_OUTPUT) {
     throw Error(`Not enough coins given to pay fee.
       tx length=${tx.byteLength()}
       fee rate=${FEE_RATE} satoshi/byte
