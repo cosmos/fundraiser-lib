@@ -206,13 +206,6 @@ contract('Fundraiser', function(accounts) {
   });
 });
 
-// THE WRONG KECCAK?!
-//const createKeccakHash = require('keccak')
-//
-//function sha3 (data) {
-//  return createKeccakHash('keccak256').update(data).digest()
-//}
-//
 contract('Fundraiser', function(accounts) {
   admin = accounts[0];
   treasury = accounts[1];
