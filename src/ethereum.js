@@ -1,5 +1,3 @@
-const fs = require("fs");
-const solc = require('solc')
 const leftPad = require('left-pad');
 const xor = require('bitwise-xor');
 
@@ -14,12 +12,31 @@ function getAddress (pub) {
 
 //------------------------
 // load the contract abi
-// TODO: just load the abi from a file ...
+// we only care about one function
+var abi = [{
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_donor",
+          "type": "address"
+        },
+        {
+          "name": "_returnAddress",
+          "type": "address"
+        },
+        {
+          "name": "checksum",
+          "type": "bytes32"
+        }
+      ],
+      "name": "donate",
+      "outputs": [],
+      "payable": true,
+      "type": "function"
+    }
+]
 
-let source = fs.readFileSync('Fundraiser.sol', 'utf8');
-let compiledContract = solc.compile(source, 1);
-let abi = compiledContract.contracts[':Fundraiser'].interface;
-let MyContract = web3.eth.contract(JSON.parse(abi));
+let MyContract = web3.eth.contract(abi);
 var contractInstance = MyContract.at('0x00');
 
 function getTransactionData(cosmosAddr, ethAddr){
