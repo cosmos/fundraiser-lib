@@ -11,7 +11,7 @@ contract Fundraiser {
 
 
     // How much is enough?
-    uint public constant dust = 100 finney;
+    uint public constant dust = 1 finney; // XXX: change for production
 
     // Who can halt/unhalt/kill?
     address public admin;
