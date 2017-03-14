@@ -16,7 +16,8 @@ const { concat, byte } = require('./util.js')
 const Wallet = struct([
   { name: 'encryptedSeed', type: struct.VarBuffer(struct.Byte) },
   { name: 'salt', type: struct.VarBuffer(struct.Byte) },
-  { name: 'iv', type: struct.VarBuffer(struct.Byte) }
+  { name: 'iv', type: struct.VarBuffer(struct.Byte) },
+  { name: 'authTag', type: struct.VarBuffer(struct.Byte) }
 ])
 
 function generateSeed () {
@@ -71,12 +72,14 @@ function encryptSeed (seed, password) {
     cipher.update(seed),
     cipher.final()
   )
-  return { encryptedSeed, salt, iv }
+  let authTag = cipher.getAuthTag()
+  return { encryptedSeed, salt, iv, authTag }
 }
 
-function decryptSeed ({ encryptedSeed, salt, iv }, password) {
+function decryptSeed ({ encryptedSeed, salt, iv, authTag }, password) {
   let key = deriveEncryptionKey(password, salt)
   let decipher = createDecipheriv('aes-256-gcm', key, iv)
+  decipher.setAuthTag(authTag)
   return concat(
     decipher.update(encryptedSeed),
     decipher.final()
