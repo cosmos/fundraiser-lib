@@ -6,7 +6,7 @@ const {
   createDecipheriv
 } = require('browserify-cipher')
 const secp256k1 = require('secp256k1')
-const pbkdf2 = require('pbkdf2').pbkdf2Sync
+const scrypt = require('scrypt-async')
 const struct = require('varstruct')
 const Bitcoin = require('./bitcoin.js')
 const Ethereum = require('./ethereum.js')
@@ -59,31 +59,35 @@ function deriveAddresses (pub, testnet = false) {
   return { cosmos, bitcoin, ethereum }
 }
 
-function deriveEncryptionKey (password, salt) {
-  return pbkdf2(password, salt, 10000, 32, 'sha512')
+function deriveEncryptionKey (password, salt, cb) {
+  scrypt(password, salt, { N: 32768, r: 10 }, (key) => {
+    cb(Buffer(key))
+  })
 }
 
-function encryptSeed (seed, password) {
+function encryptSeed (seed, password, cb) {
   let salt = randomBytes(32)
-  let key = deriveEncryptionKey(password, salt)
-  let iv = randomBytes(16)
-  let cipher = createCipheriv('aes-256-gcm', key, iv)
-  let encryptedSeed = concat(
-    cipher.update(seed),
-    cipher.final()
-  )
-  let authTag = cipher.getAuthTag()
-  return { encryptedSeed, salt, iv, authTag }
+  deriveEncryptionKey(password, salt, (key) => {
+    let iv = randomBytes(16)
+    let cipher = createCipheriv('aes-256-gcm', key, iv)
+    let encryptedSeed = concat(
+      cipher.update(seed),
+      cipher.final()
+    )
+    let authTag = cipher.getAuthTag()
+    cb(null, { encryptedSeed, salt, iv, authTag })
+  })
 }
 
-function decryptSeed ({ encryptedSeed, salt, iv, authTag }, password) {
-  let key = deriveEncryptionKey(password, salt)
-  let decipher = createDecipheriv('aes-256-gcm', key, iv)
-  decipher.setAuthTag(authTag)
-  return concat(
-    decipher.update(encryptedSeed),
-    decipher.final()
-  )
+function decryptSeed ({ encryptedSeed, salt, iv, authTag }, password, cb) {
+  deriveEncryptionKey(password, salt, (key) => {
+    let decipher = createDecipheriv('aes-256-gcm', key, iv)
+    decipher.setAuthTag(authTag)
+    cb(null, concat(
+      decipher.update(encryptedSeed),
+      decipher.final()
+    ))
+  })
 }
 
 function encodeWallet (wallet) {
