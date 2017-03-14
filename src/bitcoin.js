@@ -132,12 +132,31 @@ function sign (privKey, sigHash) {
   return secp256k1.signatureExport(signature) // convert to DER encoding
 }
 
+function fetchFundraiserStats (cb) {
+  bciRequest('GET', `multiaddr?active=${EXODUS_ADDRESS}`, null, (err, res) => {
+    if (err) return cb(err)
+    let recentTxs = res.txs
+      .filter((tx) => tx.result > 0) // only show received txs
+      .map((tx) => ({
+        donated: tx.result,
+        claimed: tx.result * ATOMS_PER_BTC / 1e8,
+        time: tx.time
+      }))
+    cb(null, {
+      amountDonated: res.addresses[0].total_received,
+      txCount: res.addresses[0].n_tx,
+      recentTxs
+    })
+  })
+}
+
 module.exports = {
   getAddress,
   fetchUtxos,
   pushTx,
   waitForPayment,
   createFinalTx,
+  fetchFundraiserStats,
   MINIMUM_AMOUNT,
   ATOMS_PER_BTC
 }
