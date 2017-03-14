@@ -1,69 +1,27 @@
 'use strict'
 
 const request = require('request')
-const old = require('old')
 
-function convertWallet (wallet) {
-  return {
-    encryptedSeed: Buffer(wallet.encryptedSeed, 'base64'),
-    salt: Buffer(wallet.salt, 'base64'),
-    iv: Buffer(wallet.iv, 'base64')
-  }
-}
+const URL = 'https://reyz3gresl.execute-api.us-west-2.amazonaws.com/development/email'
 
-// client for the fundraiser REST API, for backing up wallets
-class Client {
-  constructor (uri) {
-    this.uri = uri
+function sendEmail (emailAddress, wallet, cb) {
+  if (!Buffer.isBuffer(wallet)) {
+    return cb(Error('wallet must be a Buffer'))
   }
-
-  request (method, url, data, cb) {
-    request({
-      method,
-      url: this.uri + url,
-      json: data || true,
-      jar: true, // keep cookies
-      withCredentials: true
-    }, (err, res, data) => {
-      if (err) return cb(err)
-      if (res.statusCode !== 200) {
-        let error = Error(String(data.error || data))
-        error.code = res.statusCode
-        return cb(error)
-      }
-      cb(null, data)
-    })
-  }
-  get (url, cb) { this.request('GET', url, null, cb) }
-  post (url, data, cb) { this.request('POST', url, data, cb) }
-
-  register (user, cb) { this.post('/register', user, cb) }
-  login (user, cb) { this.post('/login', user, cb) }
-  logout (cb) { this.post('/logout', {}, cb) }
-  updateName (name, cb) { this.post('/name', { name }, cb) }
-  updateEmail (email, cb) { this.post('/email', { email }, cb) }
-  updatePassword (password, cb) { this.post('/password', { password }, cb) }
-  getUser (cb) {
-    this.get('/user', (err, user) => {
-      if (err) return cb(err)
-      user.wallets = user.wallets.map(convertWallet)
-      cb(null, user)
-    })
-  }
-  getWallets (cb) {
-    this.get('/wallets', (err, wallets) => {
-      if (err) return cb(err)
-      cb(null, wallets.map(convertWallet))
-    })
-  }
-  backupWallet (wallet, cb) {
-    wallet = {
-      encryptedSeed: wallet.encryptedSeed.toString('base64'),
-      salt: wallet.salt.toString('base64'),
-      iv: wallet.iv.toString('base64')
+  wallet = wallet.toString('base64')
+  request({
+    method: 'POST',
+    url: URL,
+    json: { emailAddress, wallet }
+  }, (err, res, data) => {
+    if (err) return cb(err)
+    if (res.statusCode !== 200) {
+      let error = Error(String(data.error || data))
+      error.code = res.statusCode
+      return cb(error)
     }
-    this.post('/wallet', wallet, cb)
-  }
+    cb(null)
+  })
 }
 
-module.exports = old(Client)
+module.exports = sendEmail
