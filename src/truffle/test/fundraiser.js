@@ -216,6 +216,9 @@ contract('Fundraiser', function(accounts) {
 
   donationValue = 200000000000000000;
 
+  atomRate = 5; // XXX: must be synced with rate set in the deployment
+  atomBalance = donationValue * atomRate;
+
   // checksum is sha3(xor(cosmosAddr, returnEthAddr)
   paddedCosmos = leftPad(web3.toAscii(cosmosAddr),32, '\x00');
   paddedEth = leftPad(web3.toAscii(returnEthAddr),32, '\x00');
@@ -270,14 +273,14 @@ contract('Fundraiser', function(accounts) {
       }
     }).then(function(returnValue) {
         // donation went through! check everything is right
-	return meta.total.call();
+	return meta.totalEther.call();
     }).catch(function(error) {
         assert(false, error.toString());
     }).then(function(returnValue) {
 	assert(returnValue, donationValue, "total was not equal to donationValue");
 	return meta.record.call(cosmosAddr);
     }).then(function(returnValue) {
-	assert(returnValue, donationValue, "donationValue incorrect");
+	assert(returnValue, atomBalance, "atomBalance incorrect");
 	return meta.returnAddresses.call(cosmosAddr);
     }).then(function(returnValue) {
 	assert(returnValue, returnEthAddr, "returnEthAddr incorrect");
@@ -286,14 +289,14 @@ contract('Fundraiser', function(accounts) {
         return meta.donate(cosmosAddr, returnEthAddr, checksum, {value: donationValue, from:otherAccount});
     }).then(function(returnValue) {
         // donation went through! check everything is right
-	return meta.total.call();
+	return meta.totalEther.call();
     }).catch(function(error) {
         assert(false, error.toString());
     }).then(function(returnValue) {
 	assert(returnValue, donationValue*2, "total was not equal to donationValue*2");
 	return meta.record.call(cosmosAddr);
     }).then(function(returnValue) {
-	assert(returnValue, donationValue*2, "donationValue incorrect");
+	assert(returnValue, atomBalance*2, "atomBalance incorrect");
 	return meta.returnAddresses.call(cosmosAddr);
     }).then(function(returnValue) {
 	assert(returnValue, returnEthAddr, "returnEthAddr incorrect");

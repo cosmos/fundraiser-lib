@@ -5,10 +5,12 @@ web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'));
 
 var Fundraiser = artifacts.require("./Fundraiser.sol");
 
-blockNum = web3.eth.blockNumber;
+var blockNum = web3.eth.blockNumber;
 
-periodBlocks = 4
-beginBlockIn = 4
+var periodBlocks = 4
+var beginBlockIn = 4
+
+var atomRate = 5;
 
 var beginBlock = blockNum + beginBlockIn;
 var endBlock = beginBlock + periodBlocks
@@ -19,5 +21,5 @@ console.log("ACCOUNTS", accounts)
 
 module.exports = function(deployer) {
   console.log("Height before deployment", blockNum);
-  deployer.deploy(Fundraiser, admin, treasury, beginBlock, endBlock);
+  deployer.deploy(Fundraiser, admin, treasury, beginBlock, endBlock, atomRate);
 };
