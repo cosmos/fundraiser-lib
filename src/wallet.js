@@ -83,10 +83,15 @@ function decryptSeed ({ encryptedSeed, salt, iv, authTag }, password, cb) {
   deriveEncryptionKey(password, salt, (key) => {
     let decipher = createDecipheriv('aes-256-gcm', key, iv)
     decipher.setAuthTag(authTag)
-    cb(null, concat(
-      decipher.update(encryptedSeed),
-      decipher.final()
-    ))
+    try {
+      let seed = concat(
+        decipher.update(encryptedSeed),
+        decipher.final()
+      )
+      cb(null, seed)
+    } catch (err) {
+      cb(err)
+    }
   })
 }
 
