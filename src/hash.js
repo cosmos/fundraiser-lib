@@ -1,12 +1,10 @@
 'use strict'
 
 const createHash = require('create-hash')
-
-var Web3 = require('web3');
-var web3 = new Web3();
+const createKeccakHash = require('keccak')
 
 function sha3 (data) {
-  return web3.sha3(data);
+  return createKeccakHash('keccak256').update(data).digest()
 }
 
 function sha2 (data) {
