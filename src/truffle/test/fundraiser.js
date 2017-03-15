@@ -2,7 +2,7 @@ const leftPad = require('left-pad');
 const xor = require('bitwise-xor');
 
 
-var Web3 = require('../../node_modules/web3');
+var Web3 = require('web3');
 var web3 = new Web3();
 web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'));
 
@@ -262,6 +262,7 @@ contract('Fundraiser', function(accounts) {
       assert(false, "donate with bad checksum was supposed to throw but didn't.");
     }).catch(function(error) {
       if(error.toString().indexOf("invalid JUMP") != -1) {
+	console.log("bad checksum correctly failed. try a good donation");
         // donate should pass with good checksum
         return meta.donate(cosmosAddr, returnEthAddr, checksum, {value: donationValue, from:otherAccount});
       } else {
@@ -270,6 +271,7 @@ contract('Fundraiser', function(accounts) {
       }
     }).then(function(returnValue) {
         // donation went through! check everything is right
+	console.log("donation accepted. checking values ...", returnValue);
 	return meta.total.call();
     }).catch(function(error) {
         assert(false, error.toString());
@@ -277,14 +279,17 @@ contract('Fundraiser', function(accounts) {
 	assert(returnValue, donationValue, "total was not equal to donationValue");
 	return meta.record.call(cosmosAddr);
     }).then(function(returnValue) {
-	assert(returnValue, donationValue, "donationValue incorrect");
-	return meta.returnAddresses.call(cosmosAddr);
+	amount = returnValue[0]
+	assert(amount, donationValue, "donationValue incorrect");
+	return meta.record.call(cosmosAddr);
     }).then(function(returnValue) {
-	assert(returnValue, returnEthAddr, "returnEthAddr incorrect");
-
+	returnAddress = returnValue[1];
+	assert(returnAddress, returnEthAddr, "returnEthAddr incorrect");
 	// make another donation
+	console.log("making another good donation", cosmosAddr, returnEthAddr, checksum, {value: donationValue, from:otherAccount});
         return meta.donate(cosmosAddr, returnEthAddr, checksum, {value: donationValue, from:otherAccount});
     }).then(function(returnValue) {
+	console.log("donation accepted. checking values ...!");
         // donation went through! check everything is right
 	return meta.total.call();
     }).catch(function(error) {
@@ -293,10 +298,12 @@ contract('Fundraiser', function(accounts) {
 	assert(returnValue, donationValue*2, "total was not equal to donationValue*2");
 	return meta.record.call(cosmosAddr);
     }).then(function(returnValue) {
-	assert(returnValue, donationValue*2, "donationValue incorrect");
-	return meta.returnAddresses.call(cosmosAddr);
+	amount = returnValue[0];
+	assert(amount, donationValue*2, "donationValue incorrect");
+	return meta.record.call(cosmosAddr);
     }).then(function(returnValue) {
-	assert(returnValue, returnEthAddr, "returnEthAddr incorrect");
+	returnAddress = returnValue[1]
+	assert(returnAddress, returnEthAddr, "returnEthAddr incorrect");
 	return web3.eth.getBalance(treasury);
     }).then(function(returnValue) {
 	assert(returnValue, donationValue*2, "treasury balance incorrect");

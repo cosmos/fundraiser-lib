@@ -25,11 +25,16 @@ contract Fundraiser {
     // Are contributions abnormally halted?
     bool public isHalted = false;
 
-    // TODO: use a struct instead of two maps
-    // The record maps cosmos addresses to their donation amounts.
-    // The returns maps to return addrs.
-    mapping (address => uint) public record;
-    mapping (address => address) public returnAddresses;
+    // The record maps cosmos addresses to their donation details,
+    // which includes the amount and the returnAddress.
+    // The struct should fit in one storage slot,
+    // which is only possible so long as the amount will be less than 2^96
+    // (current total amount of ether is ~ 2^86)
+    struct Donation {
+	    uint96 amount; // 12-bytes
+	    address returnAddress; // 20-bytes
+    }
+    mapping (address => Donation) public record;
     uint public total = 0;
 
 
@@ -75,13 +80,19 @@ contract Fundraiser {
 	// checksum is the sha3 of the xor of the bytes32 versions of the cosmos address and the return address
 	if (!(sha3(bytes32(_donor)^bytes32(_returnAddress)) == checksum)) throw;
 
-	// forward the funds to the treasurer
+	// forward the funds to the treasury
         if (!treasury.call.value(msg.value)()) throw;
 
-	// update the donor details
-        record[_donor] += msg.value;
-        returnAddresses[_donor] = _returnAddress; // overwrites
+	// fetch the donor from storage and update the details
+	var storedDonor = record[_donor];
+	storedDonor.amount += uint96(msg.value);
+	storedDonor.returnAddress = _returnAddress; // overwrites
+
+	// write the results to storage
+	record[_donor] = storedDonor;
         total += msg.value;
+
+	// fire event
         Received(_donor, msg.value);
     }
 
