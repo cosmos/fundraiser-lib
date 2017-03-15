@@ -18,12 +18,12 @@ test('generate wallet seed', function (t) {
   })
 
   t.test('seeds are all different', function (t) {
-    var seeds = Array(50).fill().map(cfr.generateSeed)
+    var seeds = Array(50).fill()
+      .map(cfr.generateSeed)
+      .map(toHex)
+      .sort()
     for (var i = 0; i < seeds.length - 1; i++) {
-      for (var j = i + 1; j < seeds.length; j++) {
-        t.notEqual(seeds[i].toString('hex'), seeds[j].toString('hex'),
-          'seeds are different')
-      }
+      t.notEqual(seeds[i], seeds[i + 1], 'seeds are different')
     }
     t.end()
   })
@@ -120,6 +120,18 @@ test('derive wallet keys/addresses', function (t) {
     t.end()
   })
 
+  t.test('derive with short seed', function (t) {
+    try {
+      var badSeed = Buffer(28)
+      cfr.deriveWallet(badSeed)
+      t.fail('should have thrown')
+    } catch (err) {
+      t.ok(err, 'error was thrown')
+      t.equal(err.message, 'Seed must be at least 32 bytes', 'correct error message')
+    }
+    t.end()
+  })
+
   t.end()
 })
 
@@ -147,55 +159,96 @@ test('wallet encryption/decryption succeeds', function (t) {
     })
   })
 
-  t.test('decrypt fails with changed ciphertext', function (t) {
-    var seed = cfr.generateSeed()
-    var password = 'password123'
-    cfr.encryptSeed(seed, password, function (err, encrypted) {
-      t.error(err)
-      encrypted.encryptedSeed[0] ^= 1
-      cfr.decryptSeed(encrypted, password, function (err, decrypted) {
-        t.ok(err, 'got error')
-        t.end()
+  function encryptThenTweak (property) {
+    t.test('decrypt fails when using tweaked ' + property, function (t) {
+      var seed = cfr.generateSeed()
+      var password = 'password123'
+      cfr.encryptSeed(seed, password, function (err, encrypted) {
+        t.error(err)
+        encrypted[property][0] ^= 1
+        cfr.decryptSeed(encrypted, password, function (err, decrypted) {
+          t.ok(err, 'got error')
+          t.end()
+        })
       })
     })
+  }
+  encryptThenTweak('encryptedSeed')
+  encryptThenTweak('salt')
+  encryptThenTweak('iv')
+  encryptThenTweak('authTag')
+
+  t.test('decrypt known encrypted seeds', function (t) {
+    var seeds = [
+      {
+        seed: 'ffc7ef2df187f2fca668ca76d1ab2802b6cfd8f027dfadc9b92a0ce2a17535f1',
+        encrypted: {
+          encryptedSeed: fromHex('0dea87c31c124a14d038e8267aa9532f3d6cfa477941e7d4ba8468466ab11460'),
+          salt: fromHex('8460a604d16866d0a6640fe6813f9a161661a5e2052101c35635c94f5d696ab7'),
+          iv: fromHex('cec3f184fb423f97ba455c78'),
+          authTag: fromHex('c75e24fd46e4ca0c78e4667d64aff501')
+        }
+      },
+      {
+        seed: '89c0b6d86ddd5d7d1baa48a813015ec8771a8a8e87bfeb691f703b533dc68493',
+        encrypted: {
+          encryptedSeed: fromHex('a056ef37f535ac1dbc5bafa5560f46b6abd19c2dc1ef6da4f65b6ab40236ba5e'),
+          salt: fromHex('870be68721e1c91ca1e5f202fbd918d1a6d191a2279196a704c92fdd9b794229'),
+          iv: fromHex('adcc4c9e3c2567250f3e0075'),
+          authTag: fromHex('9dc5e3fdca5964dc42c304cdd1e5f5f6')
+        }
+      },
+      {
+        seed: 'b3fbf802cc529c21dc85cdbd587c4b2f6b23b5737b8d4297558cbe222a895fac',
+        encrypted: {
+          encryptedSeed: fromHex('d30c7b6cb1eb4053247515f90371e3a032971cb8fdcc13283af4a165eea9c39c'),
+          salt: fromHex('290c68d4ad0fbe84967024e0058e3379f378d0f1b87601c4832fb458771dba49'),
+          iv: fromHex('7a6572f9f70f29e59e0f3ecc'),
+          authTag: fromHex('05c3aec72fe3bd0c04aca796c728ddf7')
+        }
+      }
+    ]
+    t.plan(seeds.length * 2)
+    for (var i = 0; i < seeds.length; i++) {
+      cfr.decryptSeed(seeds[i].encrypted, 'password', function (err, decrypted) {
+        t.error(err)
+        t.equal(
+          decrypted.toString('hex'),
+          seeds[i].seed,
+          'decrypted to correct value')
+      })
+    }
   })
 
-  t.test('decrypt fails with changed salt', function (t) {
-    var seed = cfr.generateSeed()
-    var password = 'password123'
-    cfr.encryptSeed(seed, password, function (err, encrypted) {
-      t.error(err)
-      encrypted.salt[0] ^= 1
-      cfr.decryptSeed(encrypted, password, function (err, decrypted) {
-        t.ok(err, 'got error')
-        t.end()
-      })
-    })
-  })
+  t.end()
+})
 
-  t.test('decrypt fails with changed iv', function (t) {
+test('wallet encode/decode', function (t) {
+  t.test('encode -> decode', function (t) {
+    t.plan(7)
     var seed = cfr.generateSeed()
-    var password = 'password123'
-    cfr.encryptSeed(seed, password, function (err, encrypted) {
+    cfr.encryptSeed(seed, 'password', function (err, encrypted) {
       t.error(err)
-      encrypted.iv[0] ^= 1
-      cfr.decryptSeed(encrypted, password, function (err, decrypted) {
-        t.ok(err, 'got error')
-        t.end()
-      })
-    })
-  })
-
-  t.test('decrypt fails with changed authTag', function (t) {
-    var seed = cfr.generateSeed()
-    var password = 'password123'
-    cfr.encryptSeed(seed, password, function (err, encrypted) {
-      t.error(err)
-      encrypted.authTag[0] ^= 1
-      cfr.decryptSeed(encrypted, password, function (err, decrypted) {
-        t.ok(err, 'got error')
-        t.end()
-      })
+      var encoded = cfr.encodeWallet(encrypted)
+      t.ok(Buffer.isBuffer(encoded), 'returned bytes are Buffer')
+      t.equal(encoded.length, 96, 'encoded to correct length')
+      var decoded = cfr.decodeWallet(encoded)
+      t.equal(
+        toHex(decoded.encryptedSeed),
+        toHex(encrypted.encryptedSeed),
+        'correct decoded encryptedSeed')
+      t.equal(
+        toHex(decoded.salt),
+        toHex(encrypted.salt),
+        'correct decoded salt')
+      t.equal(
+        toHex(decoded.iv),
+        toHex(encrypted.iv),
+        'correct decoded iv')
+      t.equal(
+        toHex(decoded.authTag),
+        toHex(encrypted.authTag),
+        'correct decoded authTag')
     })
   })
 
