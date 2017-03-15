@@ -4,7 +4,7 @@
   "description": "Tools for the Cosmos Fundraiser",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "standard src/*.js test/*.js && nyc tape test/*.js | faucet && nyc report",
     "build": "rm -rf lib && babel --presets es2015 src -d lib",
     "source": "rm -rf lib && ln -s src lib",
     "prepublish": "npm run build",
@@ -37,6 +37,10 @@
   },
   "devDependencies": {
     "babel-cli": "^6.23.0",
-    "babel-preset-es2015": "^6.22.0"
+    "babel-preset-es2015": "^6.22.0",
+    "faucet": "^0.0.1",
+    "nyc": "^10.1.2",
+    "standard": "^9.0.1",
+    "tape": "^4.6.3"
   }
 }

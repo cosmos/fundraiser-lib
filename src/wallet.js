@@ -24,10 +24,10 @@ function generateSeed () {
   return randomBytes(32)
 }
 
-function deriveWallet (seed, testnet = false) {
+function deriveWallet (seed) {
   let privateKeys = derivePrivateKeys(seed)
   let publicKeys = derivePublicKeys(privateKeys)
-  let addresses = deriveAddresses(publicKeys, testnet)
+  let addresses = deriveAddresses(publicKeys)
   return { privateKeys, publicKeys, addresses }
 }
 
@@ -52,9 +52,9 @@ function getCosmosAddress (pub) {
   return ripemd160(pub).toString('hex')
 }
 
-function deriveAddresses (pub, testnet = false) {
+function deriveAddresses (pub) {
   let cosmos = getCosmosAddress(pub.cosmos)
-  let bitcoin = Bitcoin.getAddress(pub.bitcoin, testnet)
+  let bitcoin = Bitcoin.getAddress(pub.bitcoin)
   let ethereum = Ethereum.getAddress(pub.ethereum)
   return { cosmos, bitcoin, ethereum }
 }
