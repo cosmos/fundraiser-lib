@@ -42,14 +42,24 @@ function derivePrivateKeys (seed) {
 }
 
 function derivePublicKeys (priv) {
-  let cosmos = secp256k1.publicKeyCreate(priv.cosmos)
-  let bitcoin = secp256k1.publicKeyCreate(priv.bitcoin)
-  let ethereum = secp256k1.publicKeyCreate(priv.ethereum, false)
+  // bitcoin uses compressed pubkey of 33 bytes
+  let bitcoin = secp256k1.publicKeyCreate(priv.bitcoin, true)
+
+  // ethereum and cosmos use uncompressed 64-byte pubkey and don't care for the bitcoin prefix of 0x04
+  let cosmos = secp256k1.publicKeyCreate(priv.cosmos, false).slice(-64)
+  let ethereum = secp256k1.publicKeyCreate(priv.ethereum, false).slice(-64)
   return { cosmos, bitcoin, ethereum }
 }
 
+
+
 function getCosmosAddress (pub) {
-  return ripemd160(pub).toString('hex')
+  // cosmos address is ripemd160 of the prefixed pubkey,
+  // where prefix includes type byte (0x02 for secp256k1)
+  // and varlen (0x0140 means a length of 64 bytes)
+  var prefix = Buffer.from([0x2, 0x1, 0x40]);
+  var encodedPub = Buffer.concat([prefix, pub]);
+  return ripemd160(encodedPub).toString('hex')
 }
 
 function deriveAddresses (pub) {
@@ -111,3 +121,17 @@ module.exports = {
   encodeWallet,
   decodeWallet
 }
+
+/*
+// test
+var seed = generateSeed();
+var w = deriveWallet(seed);
+console.log("ethereum -------------------------")
+console.log(w.privateKeys.ethereum.toString('hex'));
+console.log(w.publicKeys.ethereum.toString('hex'));
+console.log(w.addresses.ethereum);
+console.log("cosmos -------------------------")
+console.log(w.privateKeys.cosmos.toString('hex'));
+console.log(w.publicKeys.cosmos.toString('hex'));
+console.log(w.addresses.cosmos);
+*/
