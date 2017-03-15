@@ -51,14 +51,12 @@ function derivePublicKeys (priv) {
   return { cosmos, bitcoin, ethereum }
 }
 
-
-
 function getCosmosAddress (pub) {
   // cosmos address is ripemd160 of the prefixed pubkey,
   // where prefix includes type byte (0x02 for secp256k1)
   // and varlen (0x0140 means a length of 64 bytes)
-  var prefix = Buffer.from([0x2, 0x1, 0x40]);
-  var encodedPub = Buffer.concat([prefix, pub]);
+  var prefix = Buffer.from([0x2, 0x1, 0x40])
+  var encodedPub = Buffer.concat([prefix, pub])
   return ripemd160(encodedPub).toString('hex')
 }
 
