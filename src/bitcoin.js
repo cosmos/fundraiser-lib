@@ -66,6 +66,7 @@ function waitForPayment (address, cb) {
   // poll once every 6 seconds
   let interval = setInterval(checkForUnspent, 6000)
   checkForUnspent()
+  return interval
 }
 
 function pushTx (tx, cb) {
