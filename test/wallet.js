@@ -50,14 +50,14 @@ test('derive wallet keys/addresses', function (t) {
           bitcoin: '25add62cb3c603427fd974ef5918e24dc5afc89b6488b26c75683ee1fa29b33c'
         },
         publicKeys: {
-          cosmos: '03c310ee809aeea3c9e0b104016b88df1eeff725e07e6cc9cd55516ae1b58964bf',
-          ethereum: '04bfc5687ebc60f4bce5b03d9748062db3f45215ac995472c607a27c3740f7078073c3a5b52cce14e88540e9c361d7ace95cd96cfe9cbb11480b5086fb20ead978',
+          cosmos: 'c310ee809aeea3c9e0b104016b88df1eeff725e07e6cc9cd55516ae1b58964bfd8a5da381ad0d1f2fc88af46347fe04e9f46dff1207c67e9bbfb41eb987e1571',
+          ethereum: 'bfc5687ebc60f4bce5b03d9748062db3f45215ac995472c607a27c3740f7078073c3a5b52cce14e88540e9c361d7ace95cd96cfe9cbb11480b5086fb20ead978',
           bitcoin: '03f713e2a265185a2c03d03aea880dbadfc2764b92b0784b5333ac9f26f5886a6c'
         },
         addresses: {
-          cosmos: '3563c96efad31f7f769cd552143c73ea79d9aeca',
+          cosmos: '139fe50508369db19d327eaa94343609bbb84412',
           bitcoin: '18MrALeZbtwigqzaR3npjUAPGS825zHnL4',
-          ethereum: '0x9a847dc1bf78bf395b34133bd2f7cc451e315e3a'
+          ethereum: '0x2f30a43f39f1f5eda6ad86ff754373cc55fcc8e9'
         }
       },
       {
@@ -68,14 +68,14 @@ test('derive wallet keys/addresses', function (t) {
           bitcoin: '68af4858d6469b910290e2bf09ac14520b004c700af67f52c9bd7745920d0c03'
         },
         publicKeys: {
-          cosmos: '024fc1aa6e08ef807c00fb15b607dc53860e6ad4b752ae97e17f22a9a3ddba34e8',
-          ethereum: '0446b6336165d454f2acc0aa257d0546bb367aae513a6308915b135be162a1c7fa7f8ca19413578191728afc770af0aa0e0a8d5b740f457cf18e67f2c84a034721',
+          cosmos: '4fc1aa6e08ef807c00fb15b607dc53860e6ad4b752ae97e17f22a9a3ddba34e8af76abab970b3ab57c4db3997c046b1ef004fe9bb4679389ebdd9b53f2840b4e',
+          ethereum: '46b6336165d454f2acc0aa257d0546bb367aae513a6308915b135be162a1c7fa7f8ca19413578191728afc770af0aa0e0a8d5b740f457cf18e67f2c84a034721',
           bitcoin: '0295f7da26b2d44a9269bf0d84f12175736956552fa43f5084dc66f69fc12540b2'
         },
         addresses: {
-          cosmos: '49382851b65a3f900d379c0de9b2600bb2ed71f1',
+          cosmos: 'b8da78846f07056db967a06a1b520a845f1b0b18',
           bitcoin: '13341SMXVz8Y6v2uUuvH3UATMEmbShy1Qe',
-          ethereum: '0x91593561c6b0bacb8a77902d873894d23b6a50bc'
+          ethereum: '0x2c9894c5afabc4f6b271ae83a0a1b5d53e6b62ff'
         }
       },
       {
@@ -86,14 +86,14 @@ test('derive wallet keys/addresses', function (t) {
           bitcoin: 'cf49d8b5bb07b405c4188ffda9df6f16dccbbdffa165765b2fadd0b8cf43f0be'
         },
         publicKeys: {
-          cosmos: '024ceec63a4b0d19df11a29299722fe8a88dde4f63a549eb170605b8664f62ed0b',
-          ethereum: '046f71e90137a48175b28ee81ff455f8e174dd9eaca2ea40a9114933a827d5f3ce06bed9a232fae6ff92a11854041de004c175b9e358cf8c54281d46148e89c568',
+          cosmos: '4ceec63a4b0d19df11a29299722fe8a88dde4f63a549eb170605b8664f62ed0b9f18391165fdcd5b2308ddfedd319aafeafe098abefd65e8c5b010e6c7434042',
+          ethereum: '6f71e90137a48175b28ee81ff455f8e174dd9eaca2ea40a9114933a827d5f3ce06bed9a232fae6ff92a11854041de004c175b9e358cf8c54281d46148e89c568',
           bitcoin: '025b23e8e3e2d240c4171212fb033b131de6f3b86d2b96d5d57a6545e2862e3f97'
         },
         addresses: {
-          cosmos: '47aad8102368194bf05eb3d773362fa5e3f1d51a',
+          cosmos: '12a27b6fd4aac8ed8e283808d23727a5008184d7',
           bitcoin: '1K8UADWUWYEbsvoESwKFc4Nhkwm5rhoHy6',
-          ethereum: '0x0242e52bdf2190bea808d13dd55d45035555669e'
+          ethereum: '0x695092d5c8f9a8e8a411f4e8382e57350f6720c3'
         }
       }
     ]
