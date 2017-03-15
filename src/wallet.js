@@ -68,7 +68,7 @@ function deriveEncryptionKey (password, salt, cb) {
 function encryptSeed (seed, password, cb) {
   let salt = randomBytes(32)
   deriveEncryptionKey(password, salt, (key) => {
-    let iv = randomBytes(16)
+    let iv = randomBytes(12)
     let cipher = createCipheriv('aes-256-gcm', key, iv)
     let encryptedSeed = concat(
       cipher.update(seed),
