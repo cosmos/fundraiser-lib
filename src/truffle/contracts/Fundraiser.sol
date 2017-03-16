@@ -65,7 +65,7 @@ contract Fundraiser {
     // Can only be called during the period when halted.
     modifier only_during_halted_period { if (block.number < beginBlock || block.number >= endBlock || !isHalted) throw; _; }
     // Can only be called after the period.
-    modifier only_after_period { if (block.number < endBlock || isHalted) throw; _; }
+    modifier only_after_period { if (block.number < endBlock) throw; _; }
     // The value of the message must be sufficiently large to not be considered dust.
     modifier is_not_dust { if (msg.value < dust) throw; _; }
 
