@@ -26,13 +26,15 @@ contract Fundraiser {
 
     // Number of atoms per ether.
     // Correspondingly, number of 10^(-18)atoms per wei
+    // TODO: change units so it can handle values < 1 (ie. if eth price tanks!)
     uint public atomRate; 
 
     // Are contributions abnormally halted?
     bool public isHalted = false;
 
-    // The record maps cosmos addresses to the product of their donation amount and the current atomRate.
-    // The returns maps cosmos addresses to their ethereum return addresses.
+    // The record mapping maps cosmos addresses to the amount of atoms - the sum of 
+    // products of donation amounts by the atomRate when the donation was received.
+    // The returnAddresses mapping maps cosmos addresses to their ethereum return addresses.
     // NOTE: We could use a struct instead but would currently
     // save only one SSLOAD/SSTORE and at the expense
     // of relying on solidity type packing :o !
