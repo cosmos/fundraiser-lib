@@ -10,4 +10,4 @@ cli.parse({
 var cosmosAddr = cli.options.cosmos;
 var etherAddr = cli.options.ether;
 
-console.log(eth.getTransactionData(cosmosAddr, etherAddr))
+console.log(eth.getTransaction(cosmosAddr, etherAddr))

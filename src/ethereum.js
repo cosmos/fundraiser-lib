@@ -7,6 +7,8 @@ var web3 = new Web3()
 
 const { sha3 } = require('./hash.js')
 
+const FUNDRAISER_CONTRACT = '0xABb1fE24C9B384f8BC8e778e165D50539589BCe6'
+const GAS_LIMIT = 150000
 const ATOMS_PER_ETH = 2000
 
 function getAddress (pub) {
@@ -41,6 +43,14 @@ var abi = [{
 let MyContract = web3.eth.contract(abi)
 var contractInstance = MyContract.at('0x00')
 
+function getTransaction(cosmosAddr, ethAddr) {
+	return {
+		to: FUNDRAISER_CONTRACT,
+		gas: GAS_LIMIT,
+		data: getTransactionData(cosmosAddr,ethAddr)
+	}
+}
+
 // TODO: make sure the addresses aren't empty
 function getTransactionData (cosmosAddr, ethAddr) {
   // checksum is sha3(xor(cosmosAddr, ethAddr)
@@ -54,6 +64,7 @@ function getTransactionData (cosmosAddr, ethAddr) {
 
   return contractInstance.donate.getData(cosmosAddr, ethAddr, checksum)
 }
+
 
 
 function esiRequest (method, url, data, cb) {
@@ -114,6 +125,7 @@ function fetchTxs(address, cb) {
 
 module.exports = {
   getAddress,
+  getTransaction,
   getTransactionData,
   fetchAtomRate,
   fetchTotals,
