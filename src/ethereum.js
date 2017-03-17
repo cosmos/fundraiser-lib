@@ -6,6 +6,8 @@ var web3 = new Web3()
 
 const { sha3 } = require('./hash.js')
 
+const ATOMS_PER_ETH = 2000
+
 function getAddress (pub) {
   return '0x' + sha3(pub).slice(-20).toString('hex')
 }
@@ -53,5 +55,6 @@ function getTransactionData (cosmosAddr, ethAddr) {
 
 module.exports = {
   getAddress,
-  getTransactionData
+  getTransactionData,
+  ATOMS_PER_ETH
 }
