@@ -6,7 +6,6 @@ const { byte, concat } = require('./util.js')
 
 const DEV = process.env.NODE_ENV === 'development'
 const EXODUS_ADDRESS = '1EaV33reN8XWWUfs5jkbGMD399vie5KQc4'
-const FEE_RATE = 220 // satoshis per byte
 const MINIMUM_AMOUNT = DEV ? 60000 : 1000000 // min satoshis to send to exodus
 const ATOMS_PER_BTC = 2000
 const MINIMUM_OUTPUT = 1000
@@ -73,11 +72,14 @@ function pushTx (tx, cb) {
   bciRequest('POST', 'pushtx', { tx: tx.toHex() }, cb)
 }
 
-function createFinalTx (wallet, inputs) {
+function createFinalTx (wallet, inputs, feeRate) {
   if (inputs.amount < MINIMUM_AMOUNT) {
     throw Error(`Intermediate tx is smaller than minimum.
       minimum=${MINIMUM_AMOUNT}
       actual=${inputs.amount}`)
+  }
+  if (!feeRate || feeRate < 0) {
+    throw Error(`Must specify a transaction fee rate`)
   }
 
   let tx = new Transaction()
@@ -98,11 +100,11 @@ function createFinalTx (wallet, inputs) {
   tx.addOutput(specifyCosmosAddress, MINIMUM_OUTPUT)
 
   // deduct fee from exodus output
-  let feeAmount = tx.byteLength() * FEE_RATE
+  let feeAmount = tx.byteLength() * feeRate
   if ((tx.outs[0].value - feeAmount) < MINIMUM_OUTPUT) {
     throw Error(`Not enough coins given to pay fee.
       tx length=${tx.byteLength()}
-      fee rate=${FEE_RATE} satoshi/byte
+      fee rate=${feeRate} satoshi/byte
       fee amount=${feeAmount} satoshis
       output amount=${tx.outs[0].value} satoshis`)
   }
@@ -139,15 +141,29 @@ function fetchFundraiserStats (cb) {
     let recentTxs = res.txs
       .filter((tx) => tx.result > 0) // only show received txs
       .map((tx) => ({
+        hash: tx.hash,
         donated: tx.result,
         claimed: tx.result * ATOMS_PER_BTC / 1e8,
         time: tx.time
       }))
     cb(null, {
       amountDonated: res.addresses[0].total_received,
+      amountClaimed: res.addresses[0].total_received * ATOMS_PER_BTC / 1e8,
       txCount: res.addresses[0].n_tx,
       recentTxs
     })
+  })
+}
+
+function fetchFeeRate (cb) {
+  request({
+    url: 'https://bitcoinfees.21.co/api/v1/fees/recommended',
+    json: true
+  }, (err, res, body) => {
+    if (err || res.statusCode !== 200) {
+      return cb(err || Error(res.statusCode), body)
+    }
+    cb(null, body.halfHourFee)
   })
 }
 
@@ -158,6 +174,7 @@ module.exports = {
   waitForPayment,
   createFinalTx,
   fetchFundraiserStats,
+  fetchFeeRate,
   MINIMUM_AMOUNT,
   ATOMS_PER_BTC
 }
