@@ -9,7 +9,7 @@ const { sha3 } = require('./hash.js')
 
 const FUNDRAISER_CONTRACT = '0xABb1fE24C9B384f8BC8e778e165D50539589BCe6'
 const GAS_LIMIT = 150000
-const ATOMS_PER_ETH = 2000
+const MIN_DONATION = 1
 
 function getAddress (pub) {
   return '0x' + sha3(pub).slice(-20).toString('hex')
@@ -71,10 +71,22 @@ function esiRequest (url, qs, cb) {
     qs,
     json: true
   }, (err, res, body) => {
-    if (err || res.statusCode !== 200 || body.result === 0) {
-      return cb(err || Error(res.statusCode), body)
+    if (err || res.statusCode !== 200 || body.error) {
+      return cb(err || body.error || Error(res.statusCode), body)
     }
     cb(null, body)
+  })
+}
+
+function ethCall (address, method, cb) {
+  let data = web3.sha3(`${method}()`).slice(0, 10)
+  esiRequest('api?module=proxy&action=eth_call', {
+    to: address,
+    data,
+    tag: 'latest'
+  }, (err, res) => {
+    if (err) return cb(err)
+    cb(null, res.result)
   })
 }
 
@@ -93,25 +105,13 @@ function fetchAtomRate (address, cb) {
 
 // fetch the total raised and total atoms
 function fetchTotals (address, cb) {
-  let txData1 = web3.sha3('totalAtom()').slice(0, 10)
-  let txData2 = web3.sha3('totalEther()').slice(0, 10)
   let divisor = 1e18
-
-  let ethCall = 'api?module=proxy&action=eth_call'
-  esiRequest(ethCall, {
-    to: address,
-    data: txData1,
-    tag: 'latest'
-  }, (err, res1) => {
+  ethCall(address, 'totalAtom', (err, res) => {
     if (err) return cb(err)
-    let atoms = parseInt(res1.result, 16) / divisor
-    esiRequest(ethCall, {
-      to: address,
-      data: txData2,
-      tag: 'latest'
-    }, (err, res2) => {
+    let atoms = parseInt(res, 16) / divisor
+    ethCall(address, 'totalEther', (err, res) => {
       if (err) return cb(err)
-      let ether = parseInt(res2.result, 16) / divisor
+      let ether = parseInt(res, 16) / divisor
       cb(null, { ether, atoms })
     })
   })
@@ -137,5 +137,6 @@ module.exports = {
   fetchAtomRate,
   fetchTotals,
   fetchTxs,
-  ATOMS_PER_ETH
+  FUNDRAISER_CONTRACT,
+  MIN_DONATION
 }
