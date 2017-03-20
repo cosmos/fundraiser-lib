@@ -163,6 +163,9 @@ function fetchFeeRate (cb) {
     if (err || res.statusCode !== 200) {
       return cb(err || Error(res.statusCode), body)
     }
+    if (body.halfHourFee > 500) {
+      return cb(Error('Very high fee rate, aborting'))
+    }
     cb(null, body.halfHourFee)
   })
 }
