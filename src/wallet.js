@@ -75,10 +75,6 @@ function derivePrivateKeys (seed) {
   var ethereum = ethereumHD.privateKey.bn.toBuffer({size: 32})
   var bitcoin = bitcoinHD.privateKey.bn.toBuffer({size: 32})
 
-  console.log('c', cosmos)
-  console.log('e', ethereum)
-  console.log('b', bitcoin)
-
   return { cosmos, bitcoin, ethereum }
 }
 
