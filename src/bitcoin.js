@@ -69,11 +69,18 @@ function waitForPayment (address, cb) {
   return interval
 }
 
-function pushTx (tx, cb) {
-  bciRequest('POST', 'pushtx', { tx: tx.toHex() }, cb)
+function pushTx (txHex, cb) {
+  bciRequest('POST', 'pushtx', { tx: txHex }, cb)
 }
 
 function createFinalTx (wallet, inputs, feeRate) {
+  let inputAmount = 0
+  for (let input of inputs) inputAmount += input.value
+  inputs = {
+    utxos: inputs,
+    amount: inputAmount
+  }
+
   if (inputs.amount < MINIMUM_AMOUNT) {
     throw Error(`Intermediate tx is smaller than minimum.
       minimum=${MINIMUM_AMOUNT}
