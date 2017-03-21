@@ -23,8 +23,9 @@ function bciRequest (method, url, data, cb) {
     qs: { cors: true },
     form: data
   }, (err, res, body) => {
-    if (err || res.statusCode !== 200) {
-      return cb(err || Error(res.statusCode), body)
+    if (err) return cb(err)
+    if (res.statusCode !== 200) {
+      return cb(Error(body || res.statusCode))
     }
     try {
       body = JSON.parse(body)
