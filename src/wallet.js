@@ -10,8 +10,11 @@ const scrypt = require('scrypt-async')
 const struct = require('varstruct')
 const Bitcoin = require('./bitcoin.js')
 const Ethereum = require('./ethereum.js')
-const { sha3, ripemd160 } = require('./hash.js')
-const { concat, byte } = require('./util.js')
+const hashes = require('./hash.js')
+const utils = require('./util.js')
+
+const concat = utils.concat
+const ripemd160 = hashes.ripemd160
 
 const Wallet = struct([
   { name: 'encryptedSeed', type: struct.VarBuffer(struct.Byte) },
@@ -20,8 +23,11 @@ const Wallet = struct([
   { name: 'authTag', type: struct.VarBuffer(struct.Byte) }
 ])
 
+const Mnemonic = require('bitcore-mnemonic')
+
 function generateSeed () {
-  return randomBytes(32)
+  var code = new Mnemonic(Mnemonic.Words.ENGLISH)
+  return code.toString() // return randomBytes(32)
 }
 
 function deriveWallet (seed) {
@@ -32,12 +38,45 @@ function deriveWallet (seed) {
 }
 
 function derivePrivateKeys (seed) {
-  if (seed.length < 32) {
+  // TODO: seed is 12 words
+  /* if (seed.length < 32) {
     throw Error('Seed must be at least 32 bytes')
-  }
-  let cosmos = sha3(concat(seed, byte(0)))
-  let bitcoin = sha3(concat(seed, byte(1)))
-  let ethereum = sha3(concat(seed, byte(2)))
+  } */
+
+  // bip32 derived wallet: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
+  // single quote == hardened derivation
+  // derivation path: m/purpose/cointype/account/...
+  // purpose: the BIP which sets the spec: https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki
+  //  see motivation: https://github.com/bitcoin/bips/blob/master/bip-0043.mediawiki
+  // cointype: not clear where source of truth is but
+  //   btc = 0
+  //   eth = 60
+  //   dfn = 223
+  //   atom = 466 (?) // TODO
+  var hdPathAtom = "m/44'/466'/0'/0/0" // key controlling ATOM allocation
+  // var hdPathAtomAccount = "m/44'/223'/0'" // Account level path for ATOM allocation
+  var hdPathETHIntermediate = "m/44'/60'/0'/0/0" // ETH key for emergency return address
+  var hdPathBTCIntermediate = "m/44'/0'/0'/0/0" // BTC key forwarding donation for hdPathAtom key
+
+  // var code = new this.Mnemonic(this.Mnemonic.Words.ENGLISH);
+  var code = new Mnemonic(seed)
+  var masterKey = code.toHDPrivateKey()
+
+  // TODO: whats the difference between var and let?
+  var cosmosHD = masterKey.derive(hdPathAtom)
+  // var cosmosAccountHD = masterKey.derive(hdPathAtomAccount)
+  var ethereumHD = masterKey.derive(hdPathETHIntermediate)
+  var bitcoinHD = masterKey.derive(hdPathBTCIntermediate)
+
+  // TODO: padding!
+  var cosmos = cosmosHD.privateKey.bn.toBuffer({size: 32})
+  var ethereum = ethereumHD.privateKey.bn.toBuffer({size: 32})
+  var bitcoin = bitcoinHD.privateKey.bn.toBuffer({size: 32})
+
+  console.log('c', cosmos)
+  console.log('e', ethereum)
+  console.log('b', bitcoin)
+
   return { cosmos, bitcoin, ethereum }
 }
 
@@ -120,8 +159,8 @@ module.exports = {
   decodeWallet
 }
 
-/*
 // test
+/*
 var seed = generateSeed();
 var w = deriveWallet(seed);
 console.log("ethereum -------------------------")
@@ -132,4 +171,9 @@ console.log("cosmos -------------------------")
 console.log(w.privateKeys.cosmos.toString('hex'));
 console.log(w.publicKeys.cosmos.toString('hex'));
 console.log(w.addresses.cosmos);
+
+
+function padPrivkey (privHex) {
+  return ('0000000000000000' + privHex).slice(-64)
+}
 */
