@@ -12,8 +12,9 @@ function toHex (buf) {
 test('generate wallet seed', function (t) {
   t.test('seed is 32-byte Buffer', function (t) {
     var seed = cfr.generateSeed()
-    t.equal(seed.length, 32, 'correct length')
-    t.ok(Buffer.isBuffer(seed), 'is Buffer')
+    var words = seed.split(/\s+/g)
+    t.equal(words.length, 12, 'correct length')
+    // t.ok(Buffer.isBuffer(seed), 'is Buffer')
     t.end()
   })
 

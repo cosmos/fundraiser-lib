@@ -38,10 +38,12 @@ function deriveWallet (seed) {
 }
 
 function derivePrivateKeys (seed) {
-  // TODO: seed is 12 words
-  /* if (seed.length < 32) {
-    throw Error('Seed must be at least 32 bytes')
-  } */
+  // seed must be 12 or more space-separated words
+  // TODO: better?
+  var words = seed.split(/\s+/g)
+  if (words.length < 12) {
+    throw Error('Seed must be at least 12 words')
+  }
 
   // bip32 derived wallet: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
   // single quote == hardened derivation
@@ -159,8 +161,8 @@ module.exports = {
   decodeWallet
 }
 
-// test
 /*
+// test
 var seed = generateSeed();
 var w = deriveWallet(seed);
 console.log("ethereum -------------------------")
@@ -171,7 +173,6 @@ console.log("cosmos -------------------------")
 console.log(w.privateKeys.cosmos.toString('hex'));
 console.log(w.publicKeys.cosmos.toString('hex'));
 console.log(w.addresses.cosmos);
-
 
 function padPrivkey (privHex) {
   return ('0000000000000000' + privHex).slice(-64)
