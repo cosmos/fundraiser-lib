@@ -78,11 +78,6 @@ contract Fundraiser {
     /// Period restarted after abnormal halt.
     event Unhalted();
 
-    /// Fallback function throws. Successful donation requires arguments
-    function() {
-	throw;
-    }
-
     /// Receive a contribution for a donor cosmos address.
     /// Also store returnAddress just-in-case.
     function donate(address _donor, address _returnAddress, bytes32 checksum) payable only_during_period is_not_dust {
