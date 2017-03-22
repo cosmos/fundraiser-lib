@@ -12,6 +12,9 @@ const ATOMS_PER_BTC = 2000
 const MINIMUM_OUTPUT = 1000
 
 function getAddress (pub) {
+  if (pub == null || pub.length !== 33) {
+    throw Error('Invalid public key')
+  }
   let pubkeyHash = ripemd160(sha2(pub))
   let payload = concat(byte(0x00), pubkeyHash)
   return bs58check.encode(payload)
