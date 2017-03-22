@@ -3,7 +3,7 @@
 //! Released under the Apache Licence 2.
 //! Modified by the Interchain Foundation.
 
-pragma solidity ^0.4.7;
+pragma solidity ^0.4.8;
 
 /// Will accept Ether "contributions" and record each both as a log and in a
 /// queryable record.
