@@ -25,7 +25,7 @@ function bciRequest (method, url, data, cb) {
   }, (err, res, body) => {
     if (err) return cb(err)
     if (res.statusCode !== 200) {
-      return cb(Error(body || res.statusCode))
+      return cb(Error(body || res.statusCode), body)
     }
     try {
       body = JSON.parse(body)
