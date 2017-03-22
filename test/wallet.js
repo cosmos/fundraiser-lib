@@ -1,10 +1,6 @@
 var test = require('tape')
 var cfr = require('../')
 
-function fromHex (hex) {
-  return Buffer(hex, 'hex')
-}
-
 function toHex (buf) {
   return buf.toString('hex')
 }
@@ -12,7 +8,7 @@ function toHex (buf) {
 test('generate wallet seed', function (t) {
   t.test('seed is 32-byte Buffer', function (t) {
     var seed = cfr.generateSeed()
-    var words = seed.split(/\s+/g)
+    var words = seed.trim().split(/\s+/g)
     t.equal(words.length, 12, 'correct length')
     // t.ok(Buffer.isBuffer(seed), 'is Buffer')
     t.end()
@@ -44,64 +40,64 @@ test('derive wallet keys/addresses', function (t) {
   t.test('derive from known seeds', function (t) {
     var seeds = [
       {
-        seed: '98fbdbf2bb0ce2365dfce8c2a17bee6ae80dc5547ce6ced4c3956df086e488c6',
+        seed: 'broccoli usual lecture drum arena myself neither mushroom rich matrix off leisure',
         privateKeys: {
-          cosmos: 'efe50934d37ac358b64c8820c54d3e272174cc5a49c7166e9d5e49e68af2555b',
-          ethereum: '4acff6dc69e01998a83d988d9f7e6b20833568c9c99c019460e71df29a084b9f',
-          bitcoin: '25add62cb3c603427fd974ef5918e24dc5afc89b6488b26c75683ee1fa29b33c'
+          cosmos: 'ea537da87a3b8a7d69356b6b6aceae0b863e895d47fb08d2a695d5e33baabad0',
+          bitcoin: 'a238e766271cd7982aaf3988d4504aa86d5ae23723206fbe84f1ddf981a504bc',
+          ethereum: '160b5da715ced8a3820e9e4c42872e63a11cd330602df80c58b853805fad09c4'
         },
         publicKeys: {
-          cosmos: 'c310ee809aeea3c9e0b104016b88df1eeff725e07e6cc9cd55516ae1b58964bfd8a5da381ad0d1f2fc88af46347fe04e9f46dff1207c67e9bbfb41eb987e1571',
-          ethereum: 'bfc5687ebc60f4bce5b03d9748062db3f45215ac995472c607a27c3740f7078073c3a5b52cce14e88540e9c361d7ace95cd96cfe9cbb11480b5086fb20ead978',
-          bitcoin: '03f713e2a265185a2c03d03aea880dbadfc2764b92b0784b5333ac9f26f5886a6c'
+          cosmos: '5030cb768796c67a8b6a926ed2c86440f8aac4282c29b2bd24658e8b30b4066093f68425e04b493a4e7aa12d261bc05ea2dde1dc04e0af52d1ded5e7710bd07e',
+          bitcoin: '02b1fdef0a0fe6cbd277496f71efdf1efb71f3e856d5374ea46a97f38114351bcb',
+          ethereum: '16d470ea8cecb08eea734eff2cd3a967d81f23fbcedad3a225c32da8a170e00c39ba45ee34f2b74b4a58c0d57446722a0db2616f53ade257c684ceb8876a3cad'
         },
         addresses: {
-          cosmos: '139fe50508369db19d327eaa94343609bbb84412',
-          bitcoin: '18MrALeZbtwigqzaR3npjUAPGS825zHnL4',
-          ethereum: '0x2f30a43f39f1f5eda6ad86ff754373cc55fcc8e9'
+          cosmos: '9cf614014f8a9ce9203630bedc75ceaf7f849479',
+          bitcoin: '1N9gzHNaTEKM829qyA9eDSQTyhofBikZKR',
+          ethereum: '0x7e634728306b6b8468d068d7b851369071f0418c'
         }
       },
       {
-        seed: 'e5018474823c421c26ae18b0c02c9ac3eff60e65a6f5e3a1b664966e22dd6c3f',
+        seed: 'high pink deposit require setup sheriff reopen sword hamster diary camp magnet',
         privateKeys: {
-          cosmos: 'b4df2d1839c8a065bbf2502698a05bd3e42bfe465717c580c7b77b0add00f43a',
-          ethereum: '71c17e6046e7ae57583ed129154cc648ba2a5995ab38acdf2c44ae7ccca01ce8',
-          bitcoin: '68af4858d6469b910290e2bf09ac14520b004c700af67f52c9bd7745920d0c03'
+          cosmos: '39ca19bd92adb669a93ff1676005640b3439127f888f53f7219cc3973c0841a3',
+          bitcoin: '9f6c550e839cd7a144e255902ff0e61fc00e41f9eeaa686429a79cce2c9f0642',
+          ethereum: 'ba1f7c5a1aac06e3827d114ae8ef6ca798209bb334bbdbb068600d5d944d0462'
         },
         publicKeys: {
-          cosmos: '4fc1aa6e08ef807c00fb15b607dc53860e6ad4b752ae97e17f22a9a3ddba34e8af76abab970b3ab57c4db3997c046b1ef004fe9bb4679389ebdd9b53f2840b4e',
-          ethereum: '46b6336165d454f2acc0aa257d0546bb367aae513a6308915b135be162a1c7fa7f8ca19413578191728afc770af0aa0e0a8d5b740f457cf18e67f2c84a034721',
-          bitcoin: '0295f7da26b2d44a9269bf0d84f12175736956552fa43f5084dc66f69fc12540b2'
+          cosmos: '551401aa0154ba47e3dbd43bff8038428a47d2a7f68db4812bdba835f4de5afdc79469718d7224a222b03c16e51fc738dd909f5331529631de4683ac8f2aa769',
+          bitcoin: '02fd43bb2860c2f1637040597f7e30d148580e0631869a3a4d1a090590810437d4',
+          ethereum: 'cb07959204aca7a9ebb4ea555c6fd943f4a37e0db07c7c87b5ec35e6af43baf7682181b3742a6fefb5e5466b8a7bbbf23d77418626049d63cb4dbe8e34fbc0f0'
         },
         addresses: {
-          cosmos: 'b8da78846f07056db967a06a1b520a845f1b0b18',
-          bitcoin: '13341SMXVz8Y6v2uUuvH3UATMEmbShy1Qe',
-          ethereum: '0x2c9894c5afabc4f6b271ae83a0a1b5d53e6b62ff'
+          cosmos: 'ec72d26f1d4e9ff9c4db1b58fb120995014380a0',
+          bitcoin: '1C29TqsfgiBmNT2PS1KYbCTmEAdzK4RqCd',
+          ethereum: '0x19d82af97222197d6a330ddfa418505ddf0245f0'
         }
       },
       {
-        seed: '0ca7b9cbbdd8fde87f53cde965f5cadd331d588537936e860894476289cf68d1',
+        seed: 'meat earth crazy equal mouse follow size prosper undo struggle wild salute',
         privateKeys: {
-          cosmos: 'abbf5408a411996d180baf8e1c95db4de785aac5735888d099739d8ebdcd7436',
-          ethereum: 'a9dad59c8d9023b39ba8e9a497133d7a9eaec9eacedb60034cbfe991b0a7a649',
-          bitcoin: 'cf49d8b5bb07b405c4188ffda9df6f16dccbbdffa165765b2fadd0b8cf43f0be'
+          cosmos: 'fe9afdab8b965c2ec81063d798e7f9e1978595bc41b26dc6c18b97a3fc410c60',
+          bitcoin: '20fb97b4d234eded57fe16444d390e7b176af9cb76f6140aa071925042629118',
+          ethereum: '08debae75d93f30f5e0c6b8f776ca13b32521f2144a8da8fe2527e288b2f612a'
         },
         publicKeys: {
-          cosmos: '4ceec63a4b0d19df11a29299722fe8a88dde4f63a549eb170605b8664f62ed0b9f18391165fdcd5b2308ddfedd319aafeafe098abefd65e8c5b010e6c7434042',
-          ethereum: '6f71e90137a48175b28ee81ff455f8e174dd9eaca2ea40a9114933a827d5f3ce06bed9a232fae6ff92a11854041de004c175b9e358cf8c54281d46148e89c568',
-          bitcoin: '025b23e8e3e2d240c4171212fb033b131de6f3b86d2b96d5d57a6545e2862e3f97'
+          cosmos: '9b0f9a4b08ff033ce732a829cc93d9ef42bf1e95541c3a211ed004939ccf5be2a09d65974089b6e01d7345d1af35d6ca486c856dcdde27b3e77ddbdf25bf4ab4',
+          bitcoin: '03b0fcfb1261658e5e62a8e2e1e25bc5930ec54f032e06df52778ed53977723848',
+          ethereum: '129d3fb438649c09329cbe3784488d45524e8444bd148a8ea30fb9ba3d5d87d0a12adf332031332ae993c6387e7cd55fcd1b9c4816dc259378e2815a39f9163c'
         },
         addresses: {
-          cosmos: '12a27b6fd4aac8ed8e283808d23727a5008184d7',
-          bitcoin: '1K8UADWUWYEbsvoESwKFc4Nhkwm5rhoHy6',
-          ethereum: '0x695092d5c8f9a8e8a411f4e8382e57350f6720c3'
+          cosmos: '8de101d82487df25daacf63826763dee81b2d3bb',
+          bitcoin: '12AbwWMpWENCyw3ZRNxpVzQkYLujXjwaJv',
+          ethereum: '0x10362d809a0e0364921e988fac49d97ed7e99d5b'
         }
       }
     ]
 
     for (var i = 0; i < seeds.length; i++) {
       var knownWallet = seeds[i]
-      var seed = fromHex(knownWallet.seed)
+      var seed = knownWallet.seed
       var wallet = cfr.deriveWallet(seed)
       for (var network in knownWallet.privateKeys) {
         t.equal(
@@ -123,134 +119,14 @@ test('derive wallet keys/addresses', function (t) {
 
   t.test('derive with short seed', function (t) {
     try {
-      var badSeed = Buffer(28)
+      var badSeed = 'meat earth crazy equal mouse follow'
       cfr.deriveWallet(badSeed)
       t.fail('should have thrown')
     } catch (err) {
       t.ok(err, 'error was thrown')
-      t.equal(err.message, 'Seed must be at least 32 bytes', 'correct error message')
+      t.equal(err.message, 'Seed must be at least 12 words', 'correct error message')
     }
     t.end()
-  })
-
-  t.end()
-})
-
-test('wallet encryption/decryption succeeds', function (t) {
-  t.test('encrypt -> decrypt', function (t) {
-    var seed = cfr.generateSeed()
-    var password = 'hunter2'
-    var start = Date.now()
-    cfr.encryptSeed(seed, password, function (err, encrypted) {
-      t.error(err)
-      var elapsed = Date.now() - start
-      t.ok(elapsed > 100, 'key derivation/encryption took longer than 100ms')
-      start = Date.now()
-      cfr.decryptSeed(encrypted, password, function (err, decrypted) {
-        t.error(err)
-        elapsed = Date.now() - start
-        t.ok(elapsed > 100, 'key derivation/decryption took longer than 100ms')
-        t.equal(
-          decrypted.toString('hex'),
-          seed.toString('hex'),
-          'decryption returned correct seed')
-        t.equal()
-        t.end()
-      })
-    })
-  })
-
-  function encryptThenTweak (property) {
-    t.test('decrypt fails when using tweaked ' + property, function (t) {
-      var seed = cfr.generateSeed()
-      var password = 'password123'
-      cfr.encryptSeed(seed, password, function (err, encrypted) {
-        t.error(err)
-        encrypted[property][0] ^= 1
-        cfr.decryptSeed(encrypted, password, function (err, decrypted) {
-          t.ok(err, 'got error')
-          t.end()
-        })
-      })
-    })
-  }
-  encryptThenTweak('encryptedSeed')
-  encryptThenTweak('salt')
-  encryptThenTweak('iv')
-  encryptThenTweak('authTag')
-
-  t.test('decrypt known encrypted seeds', function (t) {
-    var seeds = [
-      {
-        seed: 'ffc7ef2df187f2fca668ca76d1ab2802b6cfd8f027dfadc9b92a0ce2a17535f1',
-        encrypted: {
-          encryptedSeed: fromHex('0dea87c31c124a14d038e8267aa9532f3d6cfa477941e7d4ba8468466ab11460'),
-          salt: fromHex('8460a604d16866d0a6640fe6813f9a161661a5e2052101c35635c94f5d696ab7'),
-          iv: fromHex('cec3f184fb423f97ba455c78'),
-          authTag: fromHex('c75e24fd46e4ca0c78e4667d64aff501')
-        }
-      },
-      {
-        seed: '89c0b6d86ddd5d7d1baa48a813015ec8771a8a8e87bfeb691f703b533dc68493',
-        encrypted: {
-          encryptedSeed: fromHex('a056ef37f535ac1dbc5bafa5560f46b6abd19c2dc1ef6da4f65b6ab40236ba5e'),
-          salt: fromHex('870be68721e1c91ca1e5f202fbd918d1a6d191a2279196a704c92fdd9b794229'),
-          iv: fromHex('adcc4c9e3c2567250f3e0075'),
-          authTag: fromHex('9dc5e3fdca5964dc42c304cdd1e5f5f6')
-        }
-      },
-      {
-        seed: 'b3fbf802cc529c21dc85cdbd587c4b2f6b23b5737b8d4297558cbe222a895fac',
-        encrypted: {
-          encryptedSeed: fromHex('d30c7b6cb1eb4053247515f90371e3a032971cb8fdcc13283af4a165eea9c39c'),
-          salt: fromHex('290c68d4ad0fbe84967024e0058e3379f378d0f1b87601c4832fb458771dba49'),
-          iv: fromHex('7a6572f9f70f29e59e0f3ecc'),
-          authTag: fromHex('05c3aec72fe3bd0c04aca796c728ddf7')
-        }
-      }
-    ]
-    t.plan(seeds.length * 2)
-    for (var i = 0; i < seeds.length; i++) {
-      cfr.decryptSeed(seeds[i].encrypted, 'password', function (err, decrypted) {
-        t.error(err)
-        t.equal(
-          decrypted.toString('hex'),
-          seeds[i].seed,
-          'decrypted to correct value')
-      })
-    }
-  })
-
-  t.end()
-})
-
-test('wallet encode/decode', function (t) {
-  t.test('encode -> decode', function (t) {
-    t.plan(7)
-    var seed = cfr.generateSeed()
-    cfr.encryptSeed(seed, 'password', function (err, encrypted) {
-      t.error(err)
-      var encoded = cfr.encodeWallet(encrypted)
-      t.ok(Buffer.isBuffer(encoded), 'returned bytes are Buffer')
-      t.equal(encoded.length, 96, 'encoded to correct length')
-      var decoded = cfr.decodeWallet(encoded)
-      t.equal(
-        toHex(decoded.encryptedSeed),
-        toHex(encrypted.encryptedSeed),
-        'correct decoded encryptedSeed')
-      t.equal(
-        toHex(decoded.salt),
-        toHex(encrypted.salt),
-        'correct decoded salt')
-      t.equal(
-        toHex(decoded.iv),
-        toHex(encrypted.iv),
-        'correct decoded iv')
-      t.equal(
-        toHex(decoded.authTag),
-        toHex(encrypted.authTag),
-        'correct decoded authTag')
-    })
   })
 
   t.end()
