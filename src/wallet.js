@@ -1,14 +1,14 @@
 'use strict'
 
 const secp256k1 = require('secp256k1')
-const Mnemonic = require('bitcore-mnemonic')
 const Bitcoin = require('./bitcoin.js')
 const Cosmos = require('./cosmos.js')
 const Ethereum = require('./ethereum.js')
+const bip39 = require('bip39')
+const { HDNode } = require('bitcoinjs-lib')
 
 function generateMnemonic () {
-  var code = new Mnemonic(Mnemonic.Words.ENGLISH)
-  return code.toString()
+  return bip39.generateMnemonic()
 }
 
 function deriveWallet (mnemonic) {
@@ -18,12 +18,20 @@ function deriveWallet (mnemonic) {
   return { privateKeys, publicKeys, addresses }
 }
 
-function derivePrivateKeys (mnemonic) {
+function deriveMasterKey (mnemonic) {
   // seed must be 12 or more space-separated words
   var words = mnemonic.trim().split(/\s+/g)
   if (words.length < 12) {
-    throw Error('Seed must be at least 12 words')
+    throw Error('Mnemonic must be at least 12 words')
   }
+
+  var seed = bip39.mnemonicToSeed(mnemonic)
+  var masterKey = bjs.HDNode.fromSeedBuffer(seed)
+  return masterKey
+}
+
+function derivePrivateKeys (mnemonic) {
+  var masterKey = deriveMasterKey(mnemonic)
 
   // bip32 derived wallet: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
   // single quote == hardened derivation
@@ -39,24 +47,17 @@ function derivePrivateKeys (mnemonic) {
   var hdPathETHIntermediate = "m/44'/60'/0'/0/0" // ETH key for emergency return address
   var hdPathBTCIntermediate = "m/44'/0'/0'/0/0" // BTC key forwarding donation for hdPathAtom key
 
-  // var code = new this.Mnemonic(this.Mnemonic.Words.ENGLISH);
-  var code = new Mnemonic(mnemonic)
-  var masterKey = code.toHDPrivateKey()
+  var cosmosHD = masterKey.derivePath(hdPathAtom)
+  var ethereumHD = masterKey.derivePath(hdPathETHIntermediate)
+  var bitcoinHD = masterKey.derivePath(hdPathBTCIntermediate)
 
-  var cosmosHD = masterKey.derive(hdPathAtom)
-  var ethereumHD = masterKey.derive(hdPathETHIntermediate)
-  var bitcoinHD = masterKey.derive(hdPathBTCIntermediate)
-
-  // NOTE: if the private keys begin with a leading 0,
-  // the lib only returns 31 bytes - so we explicitly ask for 32 bytes
-  // otherwise we would be non-compliant.
+  // NOTE: we want to make sure private keys are always 32 bytes
+  // else we may have trouble. See the bitcore fiasco for more:
   // https://github.com/bitpay/bitcore-lib/issues/47
-  // Fix is not merged yet: https://github.com/bitpay/bitcore-lib/pull/97
-  // XXX: there's also a 2^-127 chance the key is invalid:
-  // https://github.com/bitpay/bitcore-lib/issues/93
-  var cosmos = cosmosHD.privateKey.bn.toBuffer({size: 32})
-  var ethereum = ethereumHD.privateKey.bn.toBuffer({size: 32})
-  var bitcoin = bitcoinHD.privateKey.bn.toBuffer({size: 32})
+  // https://github.com/bitpay/bitcore-lib/pull/97
+  var cosmos = padPrivKey(cosmosHD.keyPair.d.toBuffer())
+  var bitcoin = padPrivKey(bitcoinHD.keyPair.d.toBuffer())
+  var ethereum = padPrivKey(ethereumHD.keyPair.d.toBuffer())
 
   return { cosmos, bitcoin, ethereum }
 }
@@ -83,22 +84,25 @@ module.exports = {
 }
 
 // test
+/*
 var list = []
 var N = 1000
 for (let i = 0; i < N; i++){
-	var mnemonic = generateMnemonic()
-	var w = deriveWallet(mnemonic)
-	var obj = {
-		mnemonic: mnemonic,
-		seed: Mnemonic(mnemonic).toSeed().toString('hex'),
-		priv: w.privateKeys.cosmos.toString('hex'),
-		pub: w.publicKeys.cosmos.toString('hex'),
-		addr: w.addresses.cosmos.toString('hex'),
-	}
-	list.push(obj)
+  var mnemonic = generateMnemonic()
+  var w = deriveWallet(mnemonic)
+  var obj = {
+    mnemonic: mnemonic,
+    master: padPrivKey(deriveMasterKey(mnemonic).toObject().privateKey).toString('hex'), //.bn.toBuffer({size:32}).toString('hex'),
+    seed: Mnemonic(mnemonic).toSeed().toString('hex'),
+    priv: w.privateKeys.cosmos.toString('hex'),
+    pub: w.publicKeys.cosmos.toString('hex'),
+    addr: w.addresses.cosmos.toString('hex'),
+  }
+  list.push(obj)
 }
 
 console.log(JSON.stringify(list));
+*/
 
 /*
 var seed = generateSeed()
@@ -123,3 +127,8 @@ var obj = {
 }
 console.log(obj)
 */
+
+function padPrivKey (privB) {
+  var privHex = privB.toString('hex')
+  return Buffer(('0000000000000000' + privHex).slice(-64), 'hex')
+}

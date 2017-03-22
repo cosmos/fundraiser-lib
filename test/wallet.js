@@ -5,22 +5,22 @@ function toHex (buf) {
   return buf.toString('hex')
 }
 
-test('generate wallet seed', function (t) {
-  t.test('seed is 32-byte Buffer', function (t) {
-    var seed = cfr.generateSeed()
-    var words = seed.trim().split(/\s+/g)
+test('generate wallet mnemonic', function (t) {
+  t.test('mnemonic is 32-byte Buffer', function (t) {
+    var mnemonic = cfr.generateMnemonic()
+    var words = mnemonic.trim().split(/\s+/g)
     t.equal(words.length, 12, 'correct length')
-    // t.ok(Buffer.isBuffer(seed), 'is Buffer')
+    // t.ok(Buffer.isBuffer(mnemonic), 'is Buffer')
     t.end()
   })
 
-  t.test('seeds are all different', function (t) {
-    var seeds = Array(50).fill()
-      .map(cfr.generateSeed)
+  t.test('mnemonics are all different', function (t) {
+    var mnemonics = Array(50).fill()
+      .map(cfr.generateMnemonic)
       .map(toHex)
       .sort()
-    for (var i = 0; i < seeds.length - 1; i++) {
-      t.notEqual(seeds[i], seeds[i + 1], 'seeds are different')
+    for (var i = 0; i < mnemonics.length - 1; i++) {
+      t.notEqual(mnemonics[i], mnemonics[i + 1], 'mnemonics are different')
     }
     t.end()
   })
@@ -28,7 +28,7 @@ test('generate wallet seed', function (t) {
   t.test('Math.random is never called', function (t) {
     var random = Math.random
     Math.random = function () { t.fail('Math.random() got called') }
-    cfr.generateSeed()
+    cfr.generateMnemonic()
     Math.random = random
     t.end()
   })
@@ -37,10 +37,10 @@ test('generate wallet seed', function (t) {
 })
 
 test('derive wallet keys/addresses', function (t) {
-  t.test('derive from known seeds', function (t) {
-    var seeds = [
+  t.test('derive from known mnemonics', function (t) {
+    var mnemonics = [
 
-      { seed: 'barrel original fuel morning among eternal filter ball stove pluck matrix mechanic',
+      { mnemonic: 'barrel original fuel morning among eternal filter ball stove pluck matrix mechanic',
         privateKeys:
         { cosmos: 'bfcb217c058d8bbafd5e186eae936106ca3e943889b0b4a093ae13822fd3170c',
           bitcoin: 'e77c3de76965ad89997451de97b95bb65ede23a6bf185a55d80363d92ee37c3d',
@@ -54,7 +54,7 @@ test('derive wallet keys/addresses', function (t) {
           bitcoin: '146qwoCJBh5DWxHXVs7z29fhvzoyfPmsrM',
           ethereum: '0x3bf1ae4923e042bedc85fa16f2fbac8725a59efa' } },
 
-      { seed: 'drill direct lady member also flash cause leave fault route enroll mention',
+      { mnemonic: 'drill direct lady member also flash cause leave fault route enroll mention',
         privateKeys:
         { cosmos: '1ea54a90375cceea7a7cb653e1bf1822bc951d9ad32c526e6e11d87451230c7f',
           bitcoin: '87611eebc634ae056a346d4d005fc58d2c18d5575a93988fe4862a50a32222d3',
@@ -68,7 +68,7 @@ test('derive wallet keys/addresses', function (t) {
           bitcoin: '14u4chMHUK8rnaHoH25JpSYcyjLYZCnfh4',
           ethereum: '0x5506a84991e75aacb84fc6a18da2d47554a7944c' } },
 
-      { seed: 'faint person illness welcome clump oil acoustic cycle common dash also essay',
+      { mnemonic: 'faint person illness welcome clump oil acoustic cycle common dash also essay',
         privateKeys:
         { cosmos: 'f90019f199a8aca8662192ab417420e5f30843c9e0ffcd03d535dd25d2c06fa0',
           bitcoin: '71cdb6490c83f85dfd64dc0f97471b1f3ddaa9b5ed7cab844d5aa1e7122cbc6d',
@@ -84,10 +84,10 @@ test('derive wallet keys/addresses', function (t) {
 
     ]
 
-    for (var i = 0; i < seeds.length; i++) {
-      var knownWallet = seeds[i]
-      var seed = knownWallet.seed
-      var wallet = cfr.deriveWallet(seed)
+    for (var i = 0; i < mnemonics.length; i++) {
+      var knownWallet = mnemonics[i]
+      var mnemonic = knownWallet.mnemonic
+      var wallet = cfr.deriveWallet(mnemonic)
       for (var network in knownWallet.privateKeys) {
         t.equal(
           toHex(wallet.privateKeys[network]),
@@ -106,14 +106,14 @@ test('derive wallet keys/addresses', function (t) {
     t.end()
   })
 
-  t.test('derive with short seed', function (t) {
+  t.test('derive with short mnemonic', function (t) {
     try {
-      var badSeed = 'meat earth crazy equal mouse follow'
-      cfr.deriveWallet(badSeed)
+      var badMnemonic = 'meat earth crazy equal mouse follow'
+      cfr.deriveWallet(badMnemonic)
       t.fail('should have thrown')
     } catch (err) {
       t.ok(err, 'error was thrown')
-      t.equal(err.message, 'Seed must be at least 12 words', 'correct error message')
+      t.equal(err.message, 'Mnemonic must be at least 12 words', 'correct error message')
     }
     t.end()
   })
