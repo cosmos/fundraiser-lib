@@ -214,10 +214,13 @@ contract('Fundraiser', function(accounts) {
   cosmosAddr = accounts[3];
   returnEthAddr = accounts[4];
 
-  donationValue = 200000000000000000;
+  donationValue = 2*Math.pow(10, 17);
 
-  atomRate = 5; // XXX: must be synced with rate set in the deployment
-  atomBalance = donationValue * atomRate;
+  weiPerAtom = Math.pow(10, 17) // XXX: must be synced with rate set in the deployment
+  atomBalance = donationValue / weiPerAtom;
+
+  treasuryB0 = web3.eth.getBalance(treasury).toNumber();
+  console.log("treasuryB0", treasuryB0);
 
   // checksum is sha3(xor(cosmosAddr, returnEthAddr)
   paddedCosmos = leftPad(web3.toAscii(cosmosAddr),32, '\x00');
@@ -226,7 +229,7 @@ contract('Fundraiser', function(accounts) {
   checksum = web3.sha3(xord.toString('hex'), {encoding: 'hex'}); 
   console.log("ADDRS", cosmosAddr, returnEthAddr, checksum)
 
-  it("should only accept donatins with the checksum", function() {
+  it("should only accept donations with the checksum", function() {
     var meta;
 
     blockNum = web3.eth.blockNumber;
@@ -277,13 +280,16 @@ contract('Fundraiser', function(accounts) {
     }).catch(function(error) {
         assert(false, error.toString());
     }).then(function(returnValue) {
-	assert(returnValue, donationValue, "total was not equal to donationValue");
+	assert.equal(returnValue.toNumber(), donationValue, "total was not equal to donationValue");
 	return meta.record.call(cosmosAddr);
     }).then(function(returnValue) {
-	assert(returnValue, atomBalance, "atomBalance incorrect");
+	assert.equal(returnValue.toNumber(), atomBalance, "atomBalance incorrect");
 	return meta.returnAddresses.call(cosmosAddr);
     }).then(function(returnValue) {
-	assert(returnValue, returnEthAddr, "returnEthAddr incorrect");
+	assert.equal(returnValue, returnEthAddr, "returnEthAddr incorrect");
+	return web3.eth.getBalance(treasury);
+    }).then(function(returnValue) {
+	assert.equal(returnValue.toNumber() - treasuryB0, donationValue, "treasury balance incorrect");
 
 	// make another donation
         return meta.donate(cosmosAddr, returnEthAddr, checksum, {value: donationValue, from:otherAccount});
@@ -293,19 +299,19 @@ contract('Fundraiser', function(accounts) {
     }).catch(function(error) {
         assert(false, error.toString());
     }).then(function(returnValue) {
-	assert(returnValue, donationValue*2, "total was not equal to donationValue*2");
+	assert.equal(returnValue.toNumber(), donationValue*2, "total was not equal to donationValue*2");
 	return meta.record.call(cosmosAddr);
     }).then(function(returnValue) {
-	assert(returnValue, atomBalance*2, "atomBalance incorrect");
+	assert.equal(returnValue.toNumber(), atomBalance*2, "atomBalance incorrect");
 	return meta.returnAddresses.call(cosmosAddr);
     }).then(function(returnValue) {
-	assert(returnValue, returnEthAddr, "returnEthAddr incorrect");
+	assert.equal(returnValue, returnEthAddr, "returnEthAddr incorrect");
 	return web3.eth.getBalance(treasury);
     }).then(function(returnValue) {
-	assert(returnValue, donationValue*2, "treasury balance incorrect");
+	assert.equal(returnValue.toNumber() - treasuryB0, donationValue*2, "treasury balance incorrect");
 	return web3.eth.getBalance(meta.address);
     }).then(function(returnValue) {
-	assert(returnValue, 0, "contract balance incorrect");
+	assert.equal(returnValue, 0, "contract balance incorrect");
     });
   });
 });
