@@ -39,60 +39,49 @@ test('generate wallet seed', function (t) {
 test('derive wallet keys/addresses', function (t) {
   t.test('derive from known seeds', function (t) {
     var seeds = [
-      {
-        seed: 'broccoli usual lecture drum arena myself neither mushroom rich matrix off leisure',
-        privateKeys: {
-          cosmos: 'ea537da87a3b8a7d69356b6b6aceae0b863e895d47fb08d2a695d5e33baabad0',
-          bitcoin: 'a238e766271cd7982aaf3988d4504aa86d5ae23723206fbe84f1ddf981a504bc',
-          ethereum: '160b5da715ced8a3820e9e4c42872e63a11cd330602df80c58b853805fad09c4'
-        },
-        publicKeys: {
-          cosmos: '5030cb768796c67a8b6a926ed2c86440f8aac4282c29b2bd24658e8b30b4066093f68425e04b493a4e7aa12d261bc05ea2dde1dc04e0af52d1ded5e7710bd07e',
-          bitcoin: '02b1fdef0a0fe6cbd277496f71efdf1efb71f3e856d5374ea46a97f38114351bcb',
-          ethereum: '16d470ea8cecb08eea734eff2cd3a967d81f23fbcedad3a225c32da8a170e00c39ba45ee34f2b74b4a58c0d57446722a0db2616f53ade257c684ceb8876a3cad'
-        },
-        addresses: {
-          cosmos: '9cf614014f8a9ce9203630bedc75ceaf7f849479',
-          bitcoin: '1N9gzHNaTEKM829qyA9eDSQTyhofBikZKR',
-          ethereum: '0x7e634728306b6b8468d068d7b851369071f0418c'
-        }
-      },
-      {
-        seed: 'high pink deposit require setup sheriff reopen sword hamster diary camp magnet',
-        privateKeys: {
-          cosmos: '39ca19bd92adb669a93ff1676005640b3439127f888f53f7219cc3973c0841a3',
-          bitcoin: '9f6c550e839cd7a144e255902ff0e61fc00e41f9eeaa686429a79cce2c9f0642',
-          ethereum: 'ba1f7c5a1aac06e3827d114ae8ef6ca798209bb334bbdbb068600d5d944d0462'
-        },
-        publicKeys: {
-          cosmos: '551401aa0154ba47e3dbd43bff8038428a47d2a7f68db4812bdba835f4de5afdc79469718d7224a222b03c16e51fc738dd909f5331529631de4683ac8f2aa769',
-          bitcoin: '02fd43bb2860c2f1637040597f7e30d148580e0631869a3a4d1a090590810437d4',
-          ethereum: 'cb07959204aca7a9ebb4ea555c6fd943f4a37e0db07c7c87b5ec35e6af43baf7682181b3742a6fefb5e5466b8a7bbbf23d77418626049d63cb4dbe8e34fbc0f0'
-        },
-        addresses: {
-          cosmos: 'ec72d26f1d4e9ff9c4db1b58fb120995014380a0',
-          bitcoin: '1C29TqsfgiBmNT2PS1KYbCTmEAdzK4RqCd',
-          ethereum: '0x19d82af97222197d6a330ddfa418505ddf0245f0'
-        }
-      },
-      {
-        seed: 'meat earth crazy equal mouse follow size prosper undo struggle wild salute',
-        privateKeys: {
-          cosmos: 'fe9afdab8b965c2ec81063d798e7f9e1978595bc41b26dc6c18b97a3fc410c60',
-          bitcoin: '20fb97b4d234eded57fe16444d390e7b176af9cb76f6140aa071925042629118',
-          ethereum: '08debae75d93f30f5e0c6b8f776ca13b32521f2144a8da8fe2527e288b2f612a'
-        },
-        publicKeys: {
-          cosmos: '9b0f9a4b08ff033ce732a829cc93d9ef42bf1e95541c3a211ed004939ccf5be2a09d65974089b6e01d7345d1af35d6ca486c856dcdde27b3e77ddbdf25bf4ab4',
-          bitcoin: '03b0fcfb1261658e5e62a8e2e1e25bc5930ec54f032e06df52778ed53977723848',
-          ethereum: '129d3fb438649c09329cbe3784488d45524e8444bd148a8ea30fb9ba3d5d87d0a12adf332031332ae993c6387e7cd55fcd1b9c4816dc259378e2815a39f9163c'
-        },
-        addresses: {
-          cosmos: '8de101d82487df25daacf63826763dee81b2d3bb',
-          bitcoin: '12AbwWMpWENCyw3ZRNxpVzQkYLujXjwaJv',
-          ethereum: '0x10362d809a0e0364921e988fac49d97ed7e99d5b'
-        }
-      }
+
+      { seed: 'barrel original fuel morning among eternal filter ball stove pluck matrix mechanic',
+        privateKeys:
+        { cosmos: 'bfcb217c058d8bbafd5e186eae936106ca3e943889b0b4a093ae13822fd3170c',
+          bitcoin: 'e77c3de76965ad89997451de97b95bb65ede23a6bf185a55d80363d92ee37c3d',
+          ethereum: '7fc4d8a8146dea344ba04c593517d3f377fa6cded36cd55aee0a0bb968e651bc' },
+        publicKeys:
+        { cosmos: '02c44af294758a8404fda5107ae43b7ef21b2118174d22e2fad903f2e716d3d148',
+          bitcoin: '0338e8415fb5753747af754024cc7c71902eb5346f09691af3bca2381c1844284c',
+          ethereum: 'db419050683648df460b29fc8290b7b623d353af7e3b67e35feec12ccb0aeb8ae7a396af03bd79156a4a57a1c6269bba77818d73ba0e49aaca1e2c45b3f971b2' },
+        addresses:
+        { cosmos: 'be7434e29d0dcb806309c6d515c1042bb3de76c3',
+          bitcoin: '146qwoCJBh5DWxHXVs7z29fhvzoyfPmsrM',
+          ethereum: '0x3bf1ae4923e042bedc85fa16f2fbac8725a59efa' } },
+
+      { seed: 'drill direct lady member also flash cause leave fault route enroll mention',
+        privateKeys:
+        { cosmos: '1ea54a90375cceea7a7cb653e1bf1822bc951d9ad32c526e6e11d87451230c7f',
+          bitcoin: '87611eebc634ae056a346d4d005fc58d2c18d5575a93988fe4862a50a32222d3',
+          ethereum: '3b5752c35f34c1cbe6d0863b8d318c011a699d8b65ec592eceedbe07bebcfcd4' },
+        publicKeys:
+        { cosmos: '02468d2b7aeeb2574d8e2ebdbed55475713ce875b0e70a1eb89c294013df3b400f',
+          bitcoin: '021ca3f748d7768cb35c07d332a5ec07a6c6ec90f0bbc34e4ba72fac1093554c71',
+          ethereum: '699aa4c4855483dea3e7d9fc09e9609f8bdffd292aa06a26d4ae9c57c6a1d991c055459ea87aa6c68fcddee86095b639f46f0a7fd0f36817b7b472d07dd5890f' },
+        addresses:
+        { cosmos: 'e412a91ab5a0daa203336a5acdaac78971351b71',
+          bitcoin: '14u4chMHUK8rnaHoH25JpSYcyjLYZCnfh4',
+          ethereum: '0x5506a84991e75aacb84fc6a18da2d47554a7944c' } },
+
+      { seed: 'faint person illness welcome clump oil acoustic cycle common dash also essay',
+        privateKeys:
+        { cosmos: 'f90019f199a8aca8662192ab417420e5f30843c9e0ffcd03d535dd25d2c06fa0',
+          bitcoin: '71cdb6490c83f85dfd64dc0f97471b1f3ddaa9b5ed7cab844d5aa1e7122cbc6d',
+          ethereum: '8320bcdd421b2e0ecd17b1b1771cdd07a1c7160a3add7f70697a36342ad6157e' },
+        publicKeys:
+        { cosmos: '03b98c37504d1aed954c9feb038fa7f86a02ca7b2edbc1a1d2230ab62fac9700e9',
+          bitcoin: '03dd79679acec40c0b77e9e71490a0c5e8d03df9f7295e423bb95bcf26afb39629',
+          ethereum: 'b189b08b36a0909ce42f6758b504c130e427704dcd039d1f33a74d86872dbf9947314603c8707f4210d05a8949566e037f8b2a6b3dc4eacb300bb364ae99423d' },
+        addresses:
+        { cosmos: '6947641b402ca8fad54b38249f227710b1da9591',
+          bitcoin: '15YYtvg7XP8Tbn6SeYVbZkz6wqyEFBKkCj',
+          ethereum: '0x0837b1b4d82a319261405aff850965ed15d57d70' } }
+
     ]
 
     for (var i = 0; i < seeds.length; i++) {

@@ -12,6 +12,8 @@ const MINIMUM_OUTPUT = 1000
 
 function getAddress (pub) {
   let pubkeyHash = ripemd160(sha2(pub))
+
+  // NOTE: isn't this just an expensive way to base58check encode?
   let outputScript = script.pubKeyHashOutput(pubkeyHash)
   return address.fromOutputScript(outputScript)
 }
