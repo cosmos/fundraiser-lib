@@ -40,7 +40,7 @@ function deriveWallet (seed) {
 function derivePrivateKeys (seed) {
   // seed must be 12 or more space-separated words
   // TODO: better?
-  var words = seed.split(/\s+/g)
+  var words = seed.trim().split(/\s+/g)
   if (words.length < 12) {
     throw Error('Seed must be at least 12 words')
   }
