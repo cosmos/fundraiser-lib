@@ -39,7 +39,7 @@ contract Fundraiser {
     mapping (address => address) public returnAddresses;
 
     // The total amount of ether raised
-    uint public totalEther = 0;
+    uint public totalWei = 0;
     // The total amount of atoms suggested for allocation
     uint public totalAtom = 0;
 
@@ -96,7 +96,7 @@ contract Fundraiser {
 	}
 
 	// update the totals
-        totalEther += msg.value;
+        totalWei += msg.value;
 	totalAtom += atoms;
 
         Received(_donor, msg.value, weiPerAtom);

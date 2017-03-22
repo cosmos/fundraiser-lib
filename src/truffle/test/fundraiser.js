@@ -276,7 +276,7 @@ contract('Fundraiser', function(accounts) {
       }
     }).then(function(returnValue) {
         // donation went through! check everything is right
-	return meta.totalEther.call();
+	return meta.totalWei.call();
     }).catch(function(error) {
         assert(false, error.toString());
     }).then(function(returnValue) {
@@ -295,7 +295,7 @@ contract('Fundraiser', function(accounts) {
         return meta.donate(cosmosAddr, returnEthAddr, checksum, {value: donationValue, from:otherAccount});
     }).then(function(returnValue) {
         // donation went through! check everything is right
-	return meta.totalEther.call();
+	return meta.totalWei.call();
     }).catch(function(error) {
         assert(false, error.toString());
     }).then(function(returnValue) {
