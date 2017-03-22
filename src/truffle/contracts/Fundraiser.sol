@@ -97,7 +97,11 @@ contract Fundraiser {
 
 	// update the donor details
         record[_donor] += atoms;
-        returnAddresses[_donor] = _returnAddress; // XXX: overwrites
+	
+	// only set return address on first donation
+	if ( returnAddresses[_donor] == address(0x0) ) {
+        	returnAddresses[_donor] = _returnAddress; 
+	}
 
 	// update the totals
         totalEther += msg.value;
