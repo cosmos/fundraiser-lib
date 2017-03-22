@@ -1,3 +1,4 @@
+const bs58check = require('bs58check')
 const { Transaction, script, address } = require('bitcoinjs-lib')
 const request = require('request')
 const secp256k1 = require('secp256k1')
@@ -12,10 +13,8 @@ const MINIMUM_OUTPUT = 1000
 
 function getAddress (pub) {
   let pubkeyHash = ripemd160(sha2(pub))
-
-  // NOTE: isn't this just an expensive way to base58check encode?
-  let outputScript = script.pubKeyHashOutput(pubkeyHash)
-  return address.fromOutputScript(outputScript)
+  let payload = concat(byte(0x00), pubkeyHash)
+  return bs58check.encode(payload)
 }
 
 function bciRequest (method, url, data, cb) {
