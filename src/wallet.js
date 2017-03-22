@@ -6,21 +6,21 @@ const Bitcoin = require('./bitcoin.js')
 const Cosmos = require('./cosmos.js')
 const Ethereum = require('./ethereum.js')
 
-function generateSeed () {
+function generateMnemonic () {
   var code = new Mnemonic(Mnemonic.Words.ENGLISH)
   return code.toString()
 }
 
-function deriveWallet (seed) {
-  let privateKeys = derivePrivateKeys(seed)
+function deriveWallet (mnemonic) {
+  let privateKeys = derivePrivateKeys(mnemonic)
   let publicKeys = derivePublicKeys(privateKeys)
   let addresses = deriveAddresses(publicKeys)
   return { privateKeys, publicKeys, addresses }
 }
 
-function derivePrivateKeys (seed) {
+function derivePrivateKeys (mnemonic) {
   // seed must be 12 or more space-separated words
-  var words = seed.trim().split(/\s+/g)
+  var words = mnemonic.trim().split(/\s+/g)
   if (words.length < 12) {
     throw Error('Seed must be at least 12 words')
   }
@@ -40,7 +40,7 @@ function derivePrivateKeys (seed) {
   var hdPathBTCIntermediate = "m/44'/0'/0'/0/0" // BTC key forwarding donation for hdPathAtom key
 
   // var code = new this.Mnemonic(this.Mnemonic.Words.ENGLISH);
-  var code = new Mnemonic(seed)
+  var code = new Mnemonic(mnemonic)
   var masterKey = code.toHDPrivateKey()
 
   var cosmosHD = masterKey.derive(hdPathAtom)
@@ -78,12 +78,29 @@ function deriveAddresses (pub) {
 }
 
 module.exports = {
-  generateSeed,
+  generateMnemonic,
   deriveWallet
 }
 
-/*
 // test
+var list = []
+var N = 1000
+for (let i = 0; i < N; i++){
+	var mnemonic = generateMnemonic()
+	var w = deriveWallet(mnemonic)
+	var obj = {
+		mnemonic: mnemonic,
+		seed: Mnemonic(mnemonic).toSeed().toString('hex'),
+		priv: w.privateKeys.cosmos.toString('hex'),
+		pub: w.publicKeys.cosmos.toString('hex'),
+		addr: w.addresses.cosmos.toString('hex'),
+	}
+	list.push(obj)
+}
+
+console.log(JSON.stringify(list));
+
+/*
 var seed = generateSeed()
 var w = deriveWallet(seed)
 var obj = {
