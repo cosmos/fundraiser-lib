@@ -116,15 +116,10 @@ test('waitForPayment', function (t) {
 
 test('pushTx', function (t) {
   t.test('push invalid tx', function (t) {
-    var tx = {
-      toHex: function () {
-        return Buffer(200).fill(0).toString('hex')
-      }
-    }
-    bitcoin.pushTx(tx, function (err, res) {
+    var tx = Buffer(200).fill(0).toString('hex')
+    bitcoin.pushTx(tx, function (err) {
       t.ok(err, 'got error')
-      t.equal(err.message, '500', 'correct error message')
-      t.equal(res, 'Not accepting transaction version 0\n', 'correct res')
+      t.equal(err.message, 'Not accepting transaction version 0', 'correct error message')
       t.end()
     })
   })
@@ -133,35 +128,22 @@ test('pushTx', function (t) {
 })
 
 test('createFinalTx', function (t) {
-  t.test('create final tx with insufficient inputs', function (t) {
-    try {
-      bitcoin.createFinalTx(null, { amount: 123 })
-      t.fail('should have thrown')
-    } catch (err) {
-      t.ok(err, 'error thrown')
-      t.equal(err.message, 'Intermediate tx is smaller than minimum.\n      minimum=1000000\n      actual=123', 'correct error message')
-    }
-    t.end()
-  })
-
   t.test('create final tx with insufficient inputs for fee', function (t) {
     var seed = cfr.generateSeed()
     var wallet = cfr.deriveWallet(seed)
-    // we use a ton of inputs to make the fee very high
-    var utxos = Array(1000).fill({
+    var utxos = [{
       tx_hash: randomBytes(32).toString('hex'),
       script: randomBytes(32).toString('hex'),
-      tx_output_n: 0
-    })
+      tx_output_n: 0,
+      value: 10000000
+    }]
     try {
-      bitcoin.createFinalTx(wallet, {
-        utxos: utxos,
-        amount: 1000000
-      })
+      // we use a very high fee rate
+      bitcoin.createFinalTx(wallet, utxos, 10000000)
       t.fail('should have thrown')
     } catch (err) {
       t.ok(err, 'error thrown')
-      t.equal(err.message, 'Not enough coins given to pay fee.\n      tx length=41080\n      fee rate=220 satoshi/byte\n      fee amount=9037600 satoshis\n      output amount=1000000 satoshis', 'correct error message')
+      t.equal(err.message, 'Not enough coins given to pay fee.\n      tx length=119\n      fee rate=10000000 satoshi/byte\n      fee amount=1190000000 satoshis\n      output amount=10000000 satoshis', 'correct error message')
     }
     t.end()
   })
@@ -173,12 +155,10 @@ test('createFinalTx', function (t) {
     var utxos = [{
       tx_hash: randomBytes(32).toString('hex'),
       script: randomBytes(32).toString('hex'),
-      tx_output_n: 0
+      tx_output_n: 0,
+      value: 1000000
     }]
-    var tx = bitcoin.createFinalTx(wallet, {
-      utxos: utxos,
-      amount: 1000000
-    })
+    var tx = bitcoin.createFinalTx(wallet, utxos, 220)
     t.ok(tx, 'created tx')
     t.ok(tx.tx, 'has tx property')
     t.equal(tx.paidAmount, 1000000, 'correct paidAmount')
