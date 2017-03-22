@@ -90,7 +90,7 @@ contract Fundraiser {
 	if (!(sha3(bytes32(_donor)^bytes32(_returnAddress)) == checksum)) throw;
 
 	// forward the funds to the treasurer
-        if (!treasury.call.value(msg.value)()) throw;
+        if (!treasury.send(msg.value)) throw;
 
 	// calculate the number of atoms at the current rate
 	var atoms = msg.value * atomRate;
