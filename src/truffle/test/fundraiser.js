@@ -1,5 +1,6 @@
 const leftPad = require('left-pad');
 const xor = require('bitwise-xor');
+const eth = require('../../ethereum.js');
 
 
 var Web3 = require('web3');
@@ -222,11 +223,7 @@ contract('Fundraiser', function(accounts) {
   treasuryB0 = web3.eth.getBalance(treasury).toNumber();
   console.log("treasuryB0", treasuryB0);
 
-  // checksum is sha3(xor(cosmosAddr, returnEthAddr)
-  paddedCosmos = leftPad(web3.toAscii(cosmosAddr),32, '\x00');
-  paddedEth = leftPad(web3.toAscii(returnEthAddr),32, '\x00');
-  xord = xor(new Buffer(paddedCosmos, 'ascii'), new Buffer(paddedEth, 'ascii'));
-  checksum = web3.sha3(xord.toString('hex'), {encoding: 'hex'}); 
+  checksum = eth.addressChecksum(cosmosAddr, returnEthAddr)
   console.log("ADDRS", cosmosAddr, returnEthAddr, checksum)
 
   it("should only accept donations with the checksum", function() {

@@ -77,9 +77,9 @@ contract Fundraiser {
 
     /// Receive a contribution for a donor cosmos address.
     /// Also store returnAddress just-in-case.
-    function donate(address _donor, address _returnAddress, bytes32 checksum) payable only_during_period is_not_dust {
-	// checksum is the sha3 of the xor of the bytes32 versions of the cosmos address and the return address
-	if (!(sha3(bytes32(_donor)^bytes32(_returnAddress)) == checksum)) throw;
+    function donate(address _donor, address _returnAddress, bytes4 checksum) payable only_during_period is_not_dust {
+	// checksum is the first 4 bytes of the sha3 of the xor of the bytes32 versions of the cosmos address and the return address
+	if ( !( bytes4(sha3( bytes32(_donor)^bytes32(_returnAddress) )) == checksum )) throw;
 
 	// forward the funds to the treasurer
         if (!treasury.send(msg.value)) throw;
