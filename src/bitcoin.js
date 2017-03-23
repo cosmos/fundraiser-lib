@@ -77,18 +77,14 @@ function pushTx (txHex, cb) {
   bciRequest('POST', 'pushtx', { tx: txHex }, cb)
 }
 
-function createFinalTx (wallet, inputs, feeRate) {
+function createFinalTx (inputs, feeRate) {
   let inputAmount = 0
   for (let input of inputs) inputAmount += input.value
-  inputs = {
-    utxos: inputs,
-    amount: inputAmount
-  }
 
-  if (inputs.amount < MINIMUM_AMOUNT) {
+  if (inputAmount < MINIMUM_AMOUNT) {
     throw Error(`Intermediate tx is smaller than minimum.
       minimum=${MINIMUM_AMOUNT}
-      actual=${inputs.amount}`)
+      actual=${inputAmount}`)
   }
   if (!feeRate || feeRate < 0) {
     throw Error(`Must specify a transaction fee rate`)
@@ -97,48 +93,62 @@ function createFinalTx (wallet, inputs, feeRate) {
   let tx = new Transaction()
 
   // add inputs from intermediate tx
-  for (let output of inputs.utxos) {
+  for (let output of inputs) {
     let txid = Buffer(output.tx_hash, 'hex')
     tx.addInput(txid, output.tx_output_n)
   }
 
   // pay to exodus address, spendable by Cosmos developers
   let payToExodus = address.toOutputScript(EXODUS_ADDRESS)
-  tx.addOutput(payToExodus, inputs.amount)
+  tx.addOutput(payToExodus, inputAmount - MINIMUM_OUTPUT)
 
-  // output to specify user's Cosmos address
-  let cosmosAddress = Buffer(wallet.addresses.cosmos, 'hex')
-  let specifyCosmosAddress = script.pubKeyHashOutput(cosmosAddress)
-  tx.addOutput(specifyCosmosAddress, MINIMUM_OUTPUT)
+  // output to specify the Cosmos address. we set the address
+  // when we sign the transaction
+  let cosmosAddressScript = script.pubKeyHashOutput(Buffer(20).fill(0))
+  tx.addOutput(cosmosAddressScript, MINIMUM_OUTPUT)
 
   // deduct fee from exodus output
-  let feeAmount = tx.byteLength() * feeRate
-  if ((tx.outs[0].value - feeAmount) < MINIMUM_OUTPUT) {
+  let txLength = tx.byteLength() + tx.ins.length * 107 // account for input scripts
+  let feeAmount = txLength * feeRate
+  if (tx.outs[0].value - feeAmount < MINIMUM_OUTPUT) {
     throw Error(`Not enough coins given to pay fee.
-      tx length=${tx.byteLength()}
+      tx length=${txLength}
       fee rate=${feeRate} satoshi/byte
       fee amount=${feeAmount} satoshis
       output amount=${tx.outs[0].value} satoshis`)
   }
   tx.outs[0].value -= feeAmount
 
-  // sign inputs
+  let paidAmount = inputAmount
+  let atomAmount = (tx.outs[0].value * ATOMS_PER_BTC) / 1e8
+  return { tx, paidAmount, feeAmount, atomAmount }
+}
+
+function signFinalTx (wallet, tx) {
+  tx = tx.clone()
   let privKey = wallet.privateKeys.bitcoin
   let pubKey = wallet.publicKeys.bitcoin
+
+  // set output script to specify user's Cosmos address
+  let cosmosAddress = Buffer(wallet.addresses.cosmos, 'hex')
+  let cosmosAddressScript = script.pubKeyHashOutput(cosmosAddress)
+  tx.outs[1].script = cosmosAddressScript
+
+  // all utxos we spend from should have used this script
+  let pubKeyHash = ripemd160(sha2(pubKey))
+  let scriptPubKey = script.pubKeyHashOutput(pubKeyHash)
+
+  // sign inputs
   let sigHashType = Transaction.SIGHASH_ALL
   for (let i = 0; i < tx.ins.length; i++) {
     let input = tx.ins[i] // tx input
-    let prevOut = inputs.utxos[i] // utxo associated w/ this input
-    let scriptPubKey = Buffer(prevOut.script, 'hex') // utxo's script
     let sigHash = tx.hashForSignature(i, scriptPubKey, sigHashType)
     let signature = sign(privKey, sigHash)
     signature = concat(signature, byte(sigHashType)) // append sighash type byte
     input.script = script.pubKeyHashInput(signature, pubKey)
   }
 
-  let paidAmount = inputs.amount
-  let atomAmount = (tx.outs[0].value * ATOMS_PER_BTC) / 1e8
-  return { tx, paidAmount, feeAmount, atomAmount }
+  return tx
 }
 
 function sign (privKey, sigHash) {
@@ -175,8 +185,9 @@ function fetchFeeRate (cb) {
     if (err || res.statusCode !== 200) {
       return cb(err || Error(res.statusCode), body)
     }
-    if (body.halfHourFee > 500) {
-      return cb(Error('Very high fee rate, aborting'))
+    let feeRate = body.halfHourFee
+    if (feeRate < 150 || feeRate > 1000) {
+      return cb(Error('Fee rate out of range'))
     }
     cb(null, body.halfHourFee)
   })
@@ -188,6 +199,7 @@ module.exports = {
   pushTx,
   waitForPayment,
   createFinalTx,
+  signFinalTx,
   fetchFundraiserStats,
   fetchFeeRate,
   MINIMUM_AMOUNT,
