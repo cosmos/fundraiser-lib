@@ -1,32 +1,14 @@
 'use strict'
 
-const randomBytes = require('randombytes')
-const {
-  createCipheriv,
-  createDecipheriv
-} = require('browserify-cipher')
 const secp256k1 = require('secp256k1')
-const scrypt = require('scrypt-async')
-const struct = require('varstruct')
+const Mnemonic = require('bitcore-mnemonic')
 const Bitcoin = require('./bitcoin.js')
 const Cosmos = require('./cosmos.js')
 const Ethereum = require('./ethereum.js')
-const utils = require('./util.js')
-
-const concat = utils.concat
-
-const Wallet = struct([
-  { name: 'encryptedSeed', type: struct.VarBuffer(struct.Byte) },
-  { name: 'salt', type: struct.VarBuffer(struct.Byte) },
-  { name: 'iv', type: struct.VarBuffer(struct.Byte) },
-  { name: 'authTag', type: struct.VarBuffer(struct.Byte) }
-])
-
-const Mnemonic = require('bitcore-mnemonic')
 
 function generateSeed () {
   var code = new Mnemonic(Mnemonic.Words.ENGLISH)
-  return code.toString() // return randomBytes(32)
+  return code.toString()
 }
 
 function deriveWallet (seed) {
@@ -38,7 +20,6 @@ function deriveWallet (seed) {
 
 function derivePrivateKeys (seed) {
   // seed must be 12 or more space-separated words
-  // TODO: better?
   var words = seed.trim().split(/\s+/g)
   if (words.length < 12) {
     throw Error('Seed must be at least 12 words')
@@ -96,57 +77,9 @@ function deriveAddresses (pub) {
   return { cosmos, bitcoin, ethereum }
 }
 
-function deriveEncryptionKey (password, salt, cb) {
-  scrypt(password, salt, { N: 32768, r: 10 }, (key) => {
-    cb(Buffer(key))
-  })
-}
-
-function encryptSeed (seed, password, cb) {
-  let salt = randomBytes(32)
-  deriveEncryptionKey(password, salt, (key) => {
-    let iv = randomBytes(12)
-    let cipher = createCipheriv('aes-256-gcm', key, iv)
-    let encryptedSeed = concat(
-      cipher.update(seed),
-      cipher.final()
-    )
-    let authTag = cipher.getAuthTag()
-    cb(null, { encryptedSeed, salt, iv, authTag })
-  })
-}
-
-function decryptSeed ({ encryptedSeed, salt, iv, authTag }, password, cb) {
-  deriveEncryptionKey(password, salt, (key) => {
-    let decipher = createDecipheriv('aes-256-gcm', key, iv)
-    decipher.setAuthTag(authTag)
-    try {
-      let seed = concat(
-        decipher.update(encryptedSeed),
-        decipher.final()
-      )
-      cb(null, seed)
-    } catch (err) {
-      cb(err)
-    }
-  })
-}
-
-function encodeWallet (wallet) {
-  return Wallet.encode(wallet)
-}
-
-function decodeWallet (bytes) {
-  return Wallet.decode(bytes)
-}
-
 module.exports = {
   generateSeed,
-  deriveWallet,
-  encryptSeed,
-  decryptSeed,
-  encodeWallet,
-  decodeWallet
+  deriveWallet
 }
 
 /*
