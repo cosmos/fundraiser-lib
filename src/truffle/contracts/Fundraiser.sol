@@ -31,12 +31,7 @@ contract Fundraiser {
     bool public isHalted = false;
 
     // The `record` mapping maps cosmos addresses to the amount of atoms.
-    // The `returnAddresses` mapping maps cosmos addresses to their ethereum return addresses.
-    // NOTE: We could use a struct instead but would currently
-    // save only one SSLOAD/SSTORE and at the expense
-    // of relying on solidity type packing :o !
     mapping (address => uint) public record;
-    mapping (address => address) public returnAddresses;
 
     // The total amount of ether raised
     uint public totalWei = 0;
@@ -68,15 +63,14 @@ contract Fundraiser {
     // The value of the message must be sufficiently large to not be considered dust.
     modifier is_not_dust { if (msg.value < dust) throw; _; }
 
-    /// Some contribution `amount` received from `recipient` at rate of `currentRate`.
-    event Received(address indexed recipient, uint amount, uint currentRate);
+    /// Some contribution `amount` received from `recipient` at rate of `currentRate` with emergency return of `returnAddr`.
+    event Received(address indexed recipient, address returnAddr, uint amount, uint currentRate);
     /// Period halted abnormally.
     event Halted();
     /// Period restarted after abnormal halt.
     event Unhalted();
 
     /// Receive a contribution for a donor cosmos address.
-    /// Also store returnAddress just-in-case.
     function donate(address _donor, address _returnAddress, bytes4 checksum) payable only_during_period is_not_dust {
 	// checksum is the first 4 bytes of the sha3 of the xor of the bytes32 versions of the cosmos address and the return address
 	if ( !( bytes4(sha3( bytes32(_donor)^bytes32(_returnAddress) )) == checksum )) throw;
@@ -89,17 +83,12 @@ contract Fundraiser {
 
 	// update the donor details
         record[_donor] += atoms;
-	
-	// only set return address on first donation
-	if ( returnAddresses[_donor] == address(0x0) ) {
-        	returnAddresses[_donor] = _returnAddress; 
-	}
 
 	// update the totals
         totalWei += msg.value;
 	totalAtom += atoms;
 
-        Received(_donor, msg.value, weiPerAtom);
+        Received(_donor, _returnAddress, msg.value, weiPerAtom);
     }
 
     /// Adjust the weiPerAtom

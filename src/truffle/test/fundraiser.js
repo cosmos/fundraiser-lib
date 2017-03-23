@@ -273,6 +273,17 @@ contract('Fundraiser', function(accounts) {
       }
     }).then(function(returnValue) {
         // donation went through! check everything is right
+	// starting with the log 
+
+	logs = returnValue.logs;
+	assert.equal(logs.length, 1, "expected one log");
+	args = logs[0].args;
+
+	assert.equal(args.recipient, cosmosAddr, "cosmos addr incorrect in log");
+	assert.equal(args.returnAddr, returnEthAddr, "return addr incorrect in log");
+	assert.equal(args.amount.toNumber(), donationValue, "donation amount incorrect in log");
+	assert.equal(args.currentRate.toNumber(), weiPerAtom, "weiPerAtom incorrect in log");
+
 	return meta.totalWei.call();
     }).catch(function(error) {
         assert(false, error.toString());
@@ -281,9 +292,6 @@ contract('Fundraiser', function(accounts) {
 	return meta.record.call(cosmosAddr);
     }).then(function(returnValue) {
 	assert.equal(returnValue.toNumber(), atomBalance, "atomBalance incorrect");
-	return meta.returnAddresses.call(cosmosAddr);
-    }).then(function(returnValue) {
-	assert.equal(returnValue, returnEthAddr, "returnEthAddr incorrect");
 	return web3.eth.getBalance(treasury);
     }).then(function(returnValue) {
 	assert.equal(returnValue.toNumber() - treasuryB0, donationValue, "treasury balance incorrect");
@@ -300,9 +308,6 @@ contract('Fundraiser', function(accounts) {
 	return meta.record.call(cosmosAddr);
     }).then(function(returnValue) {
 	assert.equal(returnValue.toNumber(), atomBalance*2, "atomBalance incorrect");
-	return meta.returnAddresses.call(cosmosAddr);
-    }).then(function(returnValue) {
-	assert.equal(returnValue, returnEthAddr, "returnEthAddr incorrect");
 	return web3.eth.getBalance(treasury);
     }).then(function(returnValue) {
 	assert.equal(returnValue.toNumber() - treasuryB0, donationValue*2, "treasury balance incorrect");
