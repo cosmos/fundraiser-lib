@@ -1,6 +1,5 @@
 var randomBytes = require('crypto').pseudoRandomBytes
 var test = require('tape')
-var cfr = require('../')
 var bitcoin = require('../').bitcoin
 
 function fromHex (hex) {
@@ -129,8 +128,6 @@ test('pushTx', function (t) {
 
 test('createFinalTx', function (t) {
   t.test('create final tx with insufficient inputs for fee', function (t) {
-    var seed = cfr.generateSeed()
-    var wallet = cfr.deriveWallet(seed)
     var utxos = [{
       tx_hash: randomBytes(32).toString('hex'),
       script: randomBytes(32).toString('hex'),
@@ -139,18 +136,16 @@ test('createFinalTx', function (t) {
     }]
     try {
       // we use a very high fee rate
-      bitcoin.createFinalTx(wallet, utxos, 10000000)
+      bitcoin.createFinalTx(utxos, 10000000)
       t.fail('should have thrown')
     } catch (err) {
       t.ok(err, 'error thrown')
-      t.equal(err.message, 'Not enough coins given to pay fee.\n      tx length=119\n      fee rate=10000000 satoshi/byte\n      fee amount=1190000000 satoshis\n      output amount=10000000 satoshis', 'correct error message')
+      t.equal(err.message, 'Not enough coins given to pay fee.\n      tx length=226\n      fee rate=10000000 satoshi/byte\n      fee amount=2260000000 satoshis\n      output amount=9999000 satoshis', 'correct error message')
     }
     t.end()
   })
 
   t.test('create final tx', function (t) {
-    var seed = cfr.generateSeed()
-    var wallet = cfr.deriveWallet(seed)
     // we use a ton of inputs to make the fee very high
     var utxos = [{
       tx_hash: randomBytes(32).toString('hex'),
@@ -158,12 +153,12 @@ test('createFinalTx', function (t) {
       tx_output_n: 0,
       value: 1000000
     }]
-    var tx = bitcoin.createFinalTx(wallet, utxos, 220)
+    var tx = bitcoin.createFinalTx(utxos, 220)
     t.ok(tx, 'created tx')
     t.ok(tx.tx, 'has tx property')
     t.equal(tx.paidAmount, 1000000, 'correct paidAmount')
-    t.equal(tx.feeAmount, 26180, 'correct feeAmount')
-    t.equal(tx.atomAmount, 19.4764, 'correct atomAmount')
+    t.equal(tx.feeAmount, 49720, 'correct feeAmount')
+    t.equal(tx.atomAmount, 18.9856, 'correct atomAmount')
     t.end()
   })
 
