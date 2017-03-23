@@ -26,7 +26,7 @@ function deriveMasterKey (mnemonic) {
   }
 
   var seed = bip39.mnemonicToSeed(mnemonic)
-  var masterKey = bjs.HDNode.fromSeedBuffer(seed)
+  var masterKey = HDNode.fromSeedBuffer(seed)
   return masterKey
 }
 
@@ -83,17 +83,17 @@ module.exports = {
   deriveWallet
 }
 
-// test
 /*
+// test
 var list = []
-var N = 1000
+var N = 200
 for (let i = 0; i < N; i++){
   var mnemonic = generateMnemonic()
   var w = deriveWallet(mnemonic)
   var obj = {
     mnemonic: mnemonic,
-    master: padPrivKey(deriveMasterKey(mnemonic).toObject().privateKey).toString('hex'), //.bn.toBuffer({size:32}).toString('hex'),
-    seed: Mnemonic(mnemonic).toSeed().toString('hex'),
+    master: padPrivKey(deriveMasterKey(mnemonic).keyPair.d.toBuffer()).toString('hex'),
+    seed: bip39.mnemonicToSeed(mnemonic).toString('hex'),
     priv: w.privateKeys.cosmos.toString('hex'),
     pub: w.publicKeys.cosmos.toString('hex'),
     addr: w.addresses.cosmos.toString('hex'),
