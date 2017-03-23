@@ -4,6 +4,7 @@ const request = require('request')
 const secp256k1 = require('secp256k1')
 const { sha2, ripemd160 } = require('./hash.js')
 const { byte, concat } = require('./util.js')
+const bcyRequest = require('./blockcypher.js')
 
 const DEV = process.env.NODE_ENV === 'development'
 const EXODUS_ADDRESS = '1EaV33reN8XWWUfs5jkbGMD399vie5KQc4'
@@ -38,20 +39,48 @@ function bciRequest (method, url, data, cb) {
   })
 }
 
-// fetch all utxos for this address
-function fetchUtxos (address, cb) {
+// fetch all utxos for this address, using the Blockcypher API
+function fetchUtxosBcy (address, cb) {
+  bcyRequest('GET', `v1/btc/main/addrs/${address}`, { unspentOnly: true }, (err, res) => {
+    if (err) return cb(err)
+    let txrefs = res.txrefs || []
+    let unconfirmedTxrefs = res.unconfirmed_txrefs || []
+    let utxos = txrefs.concat(unconfirmedTxrefs)
+    cb(null, utxos)
+  })
+}
+
+// fetch all utxos for this address, using the Blockchain.info API
+function fetchUtxosBci (address, cb) {
   bciRequest('GET', `unspent?active=${address}`, null, (err, res) => {
     // when there are no outputs for this address,
     // blockchain API gives error 500 with this message:
     if (err && res === 'No free outputs to spend') {
-      return cb(null, { utxos: [], amount: 0 })
+      return cb(null, [])
     }
     if (err) return cb(err)
+    cb(null, res.unspent_outputs)
+  })
+}
+
+function fetchUtxos (address, cb) {
+  function done (utxos) {
+    // sum the value of the utxos
     let amount = 0
-    for (let utxo of res.unspent_outputs) {
-      amount += utxo.value
+    for (let utxo of utxos) amount += utxo.value
+    cb(null, { utxos, amount })
+  }
+
+  fetchUtxosBcy(address, (err, res) => {
+    if (err) {
+      // if blockcypher fails, try blockchain.info
+      fetchUtxosBci(address, (err, res) => {
+        if (err) return cb(err)
+        done(res)
+      })
+      return
     }
-    cb(null, { utxos: res.unspent_outputs, amount })
+    done(res)
   })
 }
 
