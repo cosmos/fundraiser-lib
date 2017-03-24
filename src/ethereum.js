@@ -60,13 +60,13 @@ function addressChecksum (cosmosAddr, ethAddr) {
     Buffer(paddedEth, 'ascii')
   )
   var checksum32 = web3.sha3(xord.toString('hex'), {encoding: 'hex'})
-  var checksum4 = checksum32.slice(0,10) // 0x and 4 bytes
+  var checksum4 = checksum32.slice(0, 10) // 0x and 4 bytes
   return checksum4
 }
 
 // TODO: make sure the addresses aren't empty
 function getTransactionData (cosmosAddr, ethAddr) {
-  checksum = addressChecksum(cosmosAddr, ethAddr)
+  var checksum = addressChecksum(cosmosAddr, ethAddr)
 
   return contractInstance.donate.getData(cosmosAddr, ethAddr, checksum)
 }
