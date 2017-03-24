@@ -85,7 +85,10 @@ function fetchUtxos (address, cb) {
 }
 
 function waitForPayment (address, cb) {
+  let cbCalled = false
   const done = (err, res) => {
+    if (cbCalled) return
+    cbCalled = true
     clearInterval(interval)
     cb(err, res)
   }
