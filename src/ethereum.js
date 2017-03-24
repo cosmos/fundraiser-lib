@@ -31,7 +31,7 @@ var abi = [{
     },
     {
       name: 'checksum',
-      type: 'bytes32'
+      type: 'bytes4'
     }
   ],
   name: 'donate',
@@ -51,16 +51,22 @@ function getTransaction (cosmosAddr, ethAddr) {
   }
 }
 
-// TODO: make sure the addresses aren't empty
-function getTransactionData (cosmosAddr, ethAddr) {
-  // checksum is sha3(xor(cosmosAddr, ethAddr)
+function addressChecksum (cosmosAddr, ethAddr) {
+  // checksum is first 4 bytes of sha3(xor(cosmosAddr, ethAddr)
   var paddedCosmos = leftPad(web3.toAscii(cosmosAddr), 32, '\x00')
   var paddedEth = leftPad(web3.toAscii(ethAddr), 32, '\x00')
   var xord = xor(
     Buffer(paddedCosmos, 'ascii'),
     Buffer(paddedEth, 'ascii')
   )
-  var checksum = web3.sha3(xord.toString('hex'), {encoding: 'hex'})
+  var checksum32 = web3.sha3(xord.toString('hex'), {encoding: 'hex'})
+  var checksum4 = checksum32.slice(0,10) // 0x and 4 bytes
+  return checksum4
+}
+
+// TODO: make sure the addresses aren't empty
+function getTransactionData (cosmosAddr, ethAddr) {
+  checksum = addressChecksum(cosmosAddr, ethAddr)
 
   return contractInstance.donate.getData(cosmosAddr, ethAddr, checksum)
 }
@@ -134,6 +140,7 @@ module.exports = {
   getAddress,
   getTransaction,
   getTransactionData,
+  addressChecksum,
   fetchAtomRate,
   fetchTotals,
   fetchTxs,

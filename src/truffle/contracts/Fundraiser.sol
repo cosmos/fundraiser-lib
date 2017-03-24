@@ -3,7 +3,7 @@
 //! Released under the Apache Licence 2.
 //! Modified by the Interchain Foundation.
 
-pragma solidity ^0.4.7;
+pragma solidity ^0.4.8;
 
 /// Will accept Ether "contributions" and record each both as a log and in a
 /// queryable record.
@@ -24,38 +24,30 @@ contract Fundraiser {
     uint public beginBlock;
     uint public endBlock;
 
-    // Number of atoms per ether.
-    // Correspondingly, number of 10^(-18)atoms per wei
-    // TODO: change units so it can handle values < 1 (ie. if eth price tanks!)
-    uint public atomRate; 
+    // Number of wei per atom
+    uint public weiPerAtom; 
 
     // Are contributions abnormally halted?
     bool public isHalted = false;
 
-    // The record mapping maps cosmos addresses to the amount of atoms - the sum of 
-    // products of donation amounts by the atomRate when the donation was received.
-    // The returnAddresses mapping maps cosmos addresses to their ethereum return addresses.
-    // NOTE: We could use a struct instead but would currently
-    // save only one SSLOAD/SSTORE and at the expense
-    // of relying on solidity type packing :o !
+    // The `record` mapping maps cosmos addresses to the amount of atoms.
     mapping (address => uint) public record;
-    mapping (address => address) public returnAddresses;
 
     // The total amount of ether raised
-    uint public totalEther = 0;
+    uint public totalWei = 0;
     // The total amount of atoms suggested for allocation
     uint public totalAtom = 0;
 
     /// Constructor. `_admin` has the ability to pause the
     /// contribution period and, eventually, kill this contract. `_treasury`
     /// receives all funds. `_beginBlock` and `_endBlock` define the begin and
-    /// end of the period. `_atomRate` is the ratio of atoms to ether.
-    function Fundraiser(address _admin, address _treasury, uint _beginBlock, uint _endBlock, uint _atomRate) {
+    /// end of the period. `_weiPerAtom` is the ratio of atoms to ether.
+    function Fundraiser(address _admin, address _treasury, uint _beginBlock, uint _endBlock, uint _weiPerAtom) {
         admin = _admin;
         treasury = _treasury;
         beginBlock = _beginBlock;
         endBlock = _endBlock;
-	atomRate = _atomRate;
+	weiPerAtom = _weiPerAtom;
     }
 
     // Can only be called by _admin.
@@ -71,45 +63,37 @@ contract Fundraiser {
     // The value of the message must be sufficiently large to not be considered dust.
     modifier is_not_dust { if (msg.value < dust) throw; _; }
 
-    /// Some contribution `amount` received from `recipient` at rate of `currentRate`.
-    event Received(address indexed recipient, uint amount, uint currentRate);
+    /// Some contribution `amount` received from `recipient` at rate of `currentRate` with emergency return of `returnAddr`.
+    event Received(address indexed recipient, address returnAddr, uint amount, uint currentRate);
     /// Period halted abnormally.
     event Halted();
     /// Period restarted after abnormal halt.
     event Unhalted();
 
-    /// Fallback function throws. Successful donation requires arguments
-    function() {
-	throw;
-    }
-
     /// Receive a contribution for a donor cosmos address.
-    /// Also store returnAddress just-in-case.
-    function donate(address _donor, address _returnAddress, bytes32 checksum) payable only_during_period is_not_dust {
-	// checksum is the sha3 of the xor of the bytes32 versions of the cosmos address and the return address
-	if (!(sha3(bytes32(_donor)^bytes32(_returnAddress)) == checksum)) throw;
+    function donate(address _donor, address _returnAddress, bytes4 checksum) payable only_during_period is_not_dust {
+	// checksum is the first 4 bytes of the sha3 of the xor of the bytes32 versions of the cosmos address and the return address
+	if ( !( bytes4(sha3( bytes32(_donor)^bytes32(_returnAddress) )) == checksum )) throw;
 
 	// forward the funds to the treasurer
-        if (!treasury.call.value(msg.value)()) throw;
+        if (!treasury.send(msg.value)) throw;
 
 	// calculate the number of atoms at the current rate
-	var atoms = msg.value * atomRate;
+	var atoms = msg.value / weiPerAtom;
 
 	// update the donor details
         record[_donor] += atoms;
-        returnAddresses[_donor] = _returnAddress; // XXX: overwrites
 
 	// update the totals
-        totalEther += msg.value;
+        totalWei += msg.value;
 	totalAtom += atoms;
 
-        Received(_donor, msg.value, atomRate);
+        Received(_donor, _returnAddress, msg.value, weiPerAtom);
     }
 
-    /// Adjust the atomRate
-    /// NOTE: Should we allow rate to adjust before the period starts?
-    function adjustRate(uint newRate) only_admin only_during_period {
-	atomRate = newRate;
+    /// Adjust the weiPerAtom
+    function adjustRate(uint newRate) only_admin {
+	weiPerAtom = newRate;
     }
 
     /// Halt the contribution period. Any attempt at contributing will fail.

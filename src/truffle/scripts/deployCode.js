@@ -17,7 +17,7 @@ cli.parse({
     treasury: [ 't', 'Treasury address', 'string', ""],                 
     begin: [ 'b', 'Begin block', 'int', 0],                 
     end: [ 'e', 'End block', 'int', 0],                 
-    atomRate: [ 'r', 'Initial atom rate', 'int', 0],                 
+    weiPerAtom: [ 'r', 'Initial atom rate', 'int', 0],                 
 });
 
 
@@ -25,10 +25,10 @@ var admin = cli.options.admin;
 var treasury = cli.options.treasury;
 var beginBlock = cli.options.begin;
 var endBlock = cli.options.end;
-var atomRate = cli.options.atomRate;
+var weiPerAtom = cli.options.weiPerAtom;
 
 // output the gas and tx data to deploy the contract
-var deployData = MyContract.new.getData(admin, treasury, beginBlock, endBlock, atomRate, {data:bytecode});
+var deployData = MyContract.new.getData(admin, treasury, beginBlock, endBlock, weiPerAtom, {data:bytecode});
 txObject = {
 	gas: 800000,
 	data: "0x"+deployData 

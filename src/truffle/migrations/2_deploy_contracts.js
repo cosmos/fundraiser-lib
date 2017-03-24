@@ -10,7 +10,7 @@ var blockNum = web3.eth.blockNumber;
 var periodBlocks = 4
 var beginBlockIn = 4
 
-var atomRate = 5;
+var weiPerAtom = Math.pow(10, 17) // 0.1 ether
 
 var beginBlock = blockNum + beginBlockIn;
 var endBlock = beginBlock + periodBlocks
@@ -21,5 +21,5 @@ console.log("ACCOUNTS", accounts)
 
 module.exports = function(deployer) {
   console.log("Height before deployment", blockNum);
-  deployer.deploy(Fundraiser, admin, treasury, beginBlock, endBlock, atomRate);
+  deployer.deploy(Fundraiser, admin, treasury, beginBlock, endBlock, weiPerAtom);
 };
