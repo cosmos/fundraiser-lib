@@ -1,8 +1,9 @@
-const { sha2, ripemd160 } = require('./hash.js')
+const Bitcoin = require('./bitcoin.js')
 
 // Same as a bitcoin address
 function getAddress (pub) {
-  return ripemd160(sha2(pub)).toString('hex')
+  let pubkeyHash = Bitcoin.getAddress160(pub)
+  return pubkeyHash.toString('hex')
 }
 
 module.exports = {

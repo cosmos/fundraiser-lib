@@ -11,7 +11,12 @@ const FUNDRAISER_CONTRACT = '0xABb1fE24C9B384f8BC8e778e165D50539589BCe6'
 const GAS_LIMIT = 150000
 const MIN_DONATION = 1
 
+// returns 0x prefixed hex address
 function getAddress (pub) {
+  if (pub == null || pub.length !== 64) {
+    throw Error('Invalid public key')
+  }
+
   return '0x' + sha3(pub).slice(-20).toString('hex')
 }
 
@@ -43,15 +48,15 @@ var abi = [{
 let MyContract = web3.eth.contract(abi)
 var contractInstance = MyContract.at('0x00')
 
-function getTransaction (cosmosAddr, ethAddr) {
-  return {
-    to: FUNDRAISER_CONTRACT,
-    gas: GAS_LIMIT,
-    data: getTransactionData(cosmosAddr, ethAddr)
-  }
-}
-
+// compute checksum for the transaction
 function addressChecksum (cosmosAddr, ethAddr) {
+  if (cosmosAddr == null || cosmosAddr.length !== 20) {
+    throw Error('Invalid cosmosAddr')
+  }
+  if (ethAddr == null || ethAddr.length !== 20) {
+    throw Error('Invalid ethAddr')
+  }
+
   // checksum is first 4 bytes of sha3(xor(cosmosAddr, ethAddr)
   var paddedCosmos = leftPad(web3.toAscii(cosmosAddr), 32, '\x00')
   var paddedEth = leftPad(web3.toAscii(ethAddr), 32, '\x00')
@@ -64,11 +69,19 @@ function addressChecksum (cosmosAddr, ethAddr) {
   return checksum4
 }
 
-// TODO: make sure the addresses aren't empty
+// data to send in transaction to fundraiser contract
 function getTransactionData (cosmosAddr, ethAddr) {
   var checksum = addressChecksum(cosmosAddr, ethAddr)
 
   return contractInstance.donate.getData(cosmosAddr, ethAddr, checksum)
+}
+
+function getTransaction (cosmosAddr, ethAddr) {
+  return {
+    to: FUNDRAISER_CONTRACT,
+    gas: GAS_LIMIT,
+    data: getTransactionData(cosmosAddr, ethAddr)
+  }
 }
 
 function esiRequest (url, qs, cb) {

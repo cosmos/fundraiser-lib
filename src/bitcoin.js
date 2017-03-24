@@ -11,11 +11,18 @@ const MINIMUM_AMOUNT = DEV ? 60000 : 1000000 // min satoshis to send to exodus
 const ATOMS_PER_BTC = 2000
 const MINIMUM_OUTPUT = 1000
 
-function getAddress (pub) {
+// returns buffer
+function getAddress160 (pub) {
   if (pub == null || pub.length !== 33) {
     throw Error('Invalid public key')
   }
-  let pubkeyHash = ripemd160(sha2(pub))
+  return ripemd160(sha2(pub))
+}
+
+// returns b58 string
+function getAddress (pub) {
+  let pubkeyHash = getAddress160(pub)
+
   let payload = concat(byte(0x00), pubkeyHash)
   return bs58check.encode(payload)
 }
@@ -194,6 +201,7 @@ function fetchFeeRate (cb) {
 }
 
 module.exports = {
+  getAddress160,
   getAddress,
   fetchUtxos,
   pushTx,
