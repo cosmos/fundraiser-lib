@@ -13,6 +13,9 @@ const FUNDRAISER_CONTRACT = '0xa4028F2aec0ad18964e368338E5268FebB4F5423'
 const GAS_LIMIT = 150000
 const MIN_DONATION = 1
 
+const ETH_NODE = 'true'
+const ETH_URL = 'http://ethereum1.interblock.io:8545'
+
 // returns 0x prefixed hex address
 function getAddress (pub) {
   if (pub == null || pub.length !== 64) {
@@ -90,6 +93,64 @@ function getTransaction (cosmosAddr, ethAddr) {
   }
 }
 
+// ---------------------------
+// request from our node
+
+function ethRequest (method, qs, cb) {
+  return request({
+    url: `${ETH_URL}`,
+    method: 'POST',
+    body: {
+      'id': 1,
+      'jsonrpc': '2.0',
+      'method': method,
+      'params': [qs]
+    },
+    json: true
+  }, (err, res, body) => {
+    if (err || res.statusCode !== 200 || body.error) {
+      return cb(err || body.error || Error(res.statusCode), body)
+    }
+    cb(null, body)
+  })
+}
+
+function ethCall (address, method, cb) {
+  let data = web3.sha3(`${method}()`).slice(0, 10)
+  ethRequest('eth_call', {
+    to: address,
+    data
+  }, (err, res) => {
+    if (err) return cb(err)
+    cb(null, res.result)
+  })
+}
+
+// fetch the current atomRate
+function ethFetchAtomRate (address, cb) {
+  ethCall(address, 'weiPerAtom', (err, res) => {
+    if (err) return cb(err)
+    cb(null, parseInt(res, 16))
+  })
+}
+
+// fetch the total raised and total atoms
+function ethFetchTotals (address, cb) {
+  let divisor = 1e18
+  ethCall(address, 'totalAtom', (err, res) => {
+    if (err) return cb(err)
+    let atoms = parseInt(res, 16) / divisor
+    ethCall(address, 'totalWei', (err, res) => {
+      if (err) return cb(err)
+      let ether = parseInt(res, 16) / divisor
+      cb(null, { ether, atoms })
+    })
+  })
+}
+
+// ---------------------------
+// request from etherscan.io
+
 function esiRequest (url, qs, cb) {
   return request({
     url: `https://api.etherscan.io/${url}`,
@@ -103,7 +164,7 @@ function esiRequest (url, qs, cb) {
   })
 }
 
-function ethCall (address, method, cb) {
+function esiCall (address, method, cb) {
   let data = web3.sha3(`${method}()`).slice(0, 10)
   esiRequest('api?module=proxy&action=eth_call', {
     to: address,
@@ -116,25 +177,44 @@ function ethCall (address, method, cb) {
 }
 
 // fetch the current atomRate
-function fetchAtomRate (address, cb) {
-  ethCall(address, 'weiPerAtom', (err, res) => {
+function esiFetchAtomRate (address, cb) {
+  esiCall(address, 'weiPerAtom', (err, res) => {
     if (err) return cb(err)
     cb(null, parseInt(res, 16))
   })
 }
 
 // fetch the total raised and total atoms
-function fetchTotals (address, cb) {
+function esiFetchTotals (address, cb) {
   let divisor = 1e18
-  ethCall(address, 'totalAtom', (err, res) => {
+  esiCall(address, 'totalAtom', (err, res) => {
     if (err) return cb(err)
     let atoms = parseInt(res, 16) / divisor
-    ethCall(address, 'totalWei', (err, res) => {
+    esiCall(address, 'totalWei', (err, res) => {
       if (err) return cb(err)
       let ether = parseInt(res, 16) / divisor
       cb(null, { ether, atoms })
     })
   })
+}
+
+// ------------------------
+// network requests
+
+function fetchAtomRate (address, cb) {
+  if (ETH_NODE) {
+    ethFetchAtomRate(address, cb)
+  } else {
+    esiFetchAtomRate(address, cb)
+  }
+}
+
+function fetchTotals (address, cb) {
+  if (ETH_NODE) {
+    ethFetchTotals(address, cb)
+  } else {
+    esiFetchTotals(address, cb)
+  }
 }
 
 // TODO: limit so it doesn't fetch all txs
@@ -155,6 +235,7 @@ module.exports = {
   getTransaction,
   getTransactionData,
   addressChecksum,
+
   fetchAtomRate,
   fetchTotals,
   fetchTxs,
