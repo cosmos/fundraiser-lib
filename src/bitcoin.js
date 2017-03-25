@@ -137,7 +137,7 @@ function signFinalTx (wallet, tx) {
   let pubKey = wallet.publicKeys.bitcoin
 
   // set output script to specify user's Cosmos address
-  let cosmosAddress = Buffer(wallet.addresses.cosmos, 'hex')
+  let cosmosAddress = Buffer(wallet.addresses.cosmos.slice(2), 'hex')
   let cosmosAddressScript = script.pubKeyHashOutput(cosmosAddress)
   tx.outs[1].script = cosmosAddressScript
 
