@@ -50,7 +50,7 @@ var contractInstance = MyContract.at('0x00')
 
 // compute checksum for the transaction
 function addressChecksum (cosmosAddr, ethAddr) {
-  let addrlen = 20*2 + 2 // 0x prefixed hex
+  let addrlen = 20 * 2 + 2 // 0x prefixed hex
   if (cosmosAddr == null || cosmosAddr.length !== addrlen) {
     throw Error('Invalid cosmosAddr ' + cosmosAddr)
   }
@@ -74,7 +74,10 @@ function addressChecksum (cosmosAddr, ethAddr) {
 function getTransactionData (cosmosAddr, ethAddr) {
   var checksum = addressChecksum(cosmosAddr, ethAddr)
 
-  return contractInstance.donate.getData(cosmosAddr, ethAddr, checksum).slice(0, (1+4+32+32+4)*2)
+  // Cut the right-padded zeros from the transaction data
+  // Length: One 0x, 4 byte method id, 32 bytes for each address, 4 byte checksum, times 2 for hex encoded
+  let dataLength = (1 + 4 + 32 + 32 + 4) * 2
+  return contractInstance.donate.getData(cosmosAddr, ethAddr, checksum).slice(0, dataLength)
 }
 
 function getTransaction (cosmosAddr, ethAddr) {

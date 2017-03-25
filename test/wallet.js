@@ -50,7 +50,7 @@ test('derive wallet keys/addresses', function (t) {
           bitcoin: '0338e8415fb5753747af754024cc7c71902eb5346f09691af3bca2381c1844284c',
           ethereum: 'db419050683648df460b29fc8290b7b623d353af7e3b67e35feec12ccb0aeb8ae7a396af03bd79156a4a57a1c6269bba77818d73ba0e49aaca1e2c45b3f971b2' },
         addresses:
-        { cosmos: 'be7434e29d0dcb806309c6d515c1042bb3de76c3',
+        { cosmos: '0xbe7434e29d0dcb806309c6d515c1042bb3de76c3',
           bitcoin: '146qwoCJBh5DWxHXVs7z29fhvzoyfPmsrM',
           ethereum: '0x3bf1ae4923e042bedc85fa16f2fbac8725a59efa' } },
 
@@ -64,7 +64,7 @@ test('derive wallet keys/addresses', function (t) {
           bitcoin: '021ca3f748d7768cb35c07d332a5ec07a6c6ec90f0bbc34e4ba72fac1093554c71',
           ethereum: '699aa4c4855483dea3e7d9fc09e9609f8bdffd292aa06a26d4ae9c57c6a1d991c055459ea87aa6c68fcddee86095b639f46f0a7fd0f36817b7b472d07dd5890f' },
         addresses:
-        { cosmos: 'e412a91ab5a0daa203336a5acdaac78971351b71',
+        { cosmos: '0xe412a91ab5a0daa203336a5acdaac78971351b71',
           bitcoin: '14u4chMHUK8rnaHoH25JpSYcyjLYZCnfh4',
           ethereum: '0x5506a84991e75aacb84fc6a18da2d47554a7944c' } },
 
@@ -78,7 +78,7 @@ test('derive wallet keys/addresses', function (t) {
           bitcoin: '03dd79679acec40c0b77e9e71490a0c5e8d03df9f7295e423bb95bcf26afb39629',
           ethereum: 'b189b08b36a0909ce42f6758b504c130e427704dcd039d1f33a74d86872dbf9947314603c8707f4210d05a8949566e037f8b2a6b3dc4eacb300bb364ae99423d' },
         addresses:
-        { cosmos: '6947641b402ca8fad54b38249f227710b1da9591',
+        { cosmos: '0x6947641b402ca8fad54b38249f227710b1da9591',
           bitcoin: '15YYtvg7XP8Tbn6SeYVbZkz6wqyEFBKkCj',
           ethereum: '0x0837b1b4d82a319261405aff850965ed15d57d70' } }
 
