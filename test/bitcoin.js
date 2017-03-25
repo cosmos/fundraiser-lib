@@ -52,18 +52,14 @@ test('fetchUtxos', function (t) {
       t.error(err, 'no error')
       t.ok(res.amount >= 2000, 'correct amount')
       t.ok(res.utxos.length >= 2, 'correct utxo count')
-      var lastUtxo = res.utxos[res.utxos.length - 1]
+      var lastUtxo = res.utxos[0]
       t.equal(
         lastUtxo.tx_hash,
-        'e5b399df6eec2f7093bdc16472a98768080ee7f61673b74524e2410bd00784da',
+        'da8407d00b41e22445b77316f6e70e086887a97264c1bd93702fec6edf99b3e5',
         'correct utxo tx_hash value')
       t.equal(
-        lastUtxo.tx_hash_big_endian,
-        'da8407d00b41e22445b77316f6e70e086887a97264c1bd93702fec6edf99b3e5',
-        'correct utxo tx_hash_big_endian value')
-      t.equal(
-        lastUtxo.tx_index, 229649052,
-        'correct utxo tx_index value')
+        lastUtxo.block_height, 456234,
+        'correct utxo block_height value')
       t.equal(
         lastUtxo.tx_output_n, 1,
         'correct utxo tx_output_n value')
@@ -74,9 +70,6 @@ test('fetchUtxos', function (t) {
       t.equal(
         lastUtxo.value, 1000,
         'correct utxo value')
-      t.equal(
-        lastUtxo.value_hex, '03e8',
-        'correct utxo value_hex value')
       t.end()
     })
   })
@@ -118,7 +111,6 @@ test('pushTx', function (t) {
     var tx = Buffer(200).fill(0).toString('hex')
     bitcoin.pushTx(tx, function (err) {
       t.ok(err, 'got error')
-      t.equal(err.message, 'Not accepting transaction version 0', 'correct error message')
       t.end()
     })
   })
@@ -140,7 +132,7 @@ test('createFinalTx', function (t) {
       t.fail('should have thrown')
     } catch (err) {
       t.ok(err, 'error thrown')
-      t.equal(err.message, 'Not enough coins given to pay fee.\n      tx length=226\n      fee rate=10000000 satoshi/byte\n      fee amount=2260000000 satoshis\n      output amount=9999000 satoshis', 'correct error message')
+      t.equal(err.message, 'Not enough coins given to pay fee.\n      tx length=223\n      fee rate=10000000 satoshi/byte\n      fee amount=2230000000 satoshis\n      output amount=9999000 satoshis', 'correct error message')
     }
     t.end()
   })
@@ -157,8 +149,8 @@ test('createFinalTx', function (t) {
     t.ok(tx, 'created tx')
     t.ok(tx.tx, 'has tx property')
     t.equal(tx.paidAmount, 1000000, 'correct paidAmount')
-    t.equal(tx.feeAmount, 49720, 'correct feeAmount')
-    t.equal(tx.atomAmount, 18.9856, 'correct atomAmount')
+    t.equal(tx.feeAmount, 49060, 'correct feeAmount')
+    t.equal(tx.atomAmount, 18.9988, 'correct atomAmount')
     t.end()
   })
 

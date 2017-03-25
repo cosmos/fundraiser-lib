@@ -27,10 +27,13 @@ function getAddress (pub) {
   return bs58check.encode(payload)
 }
 
-function bciRequest (method, url, data, cb) {
+// -----------------------------
+// blockcypher requests
+
+function bcRequest (method, url, data, cb) {
   return request({
     method,
-    url: `https://blockchain.info/${url}`,
+    url: `https://api.blockcypher.com/v1/btc/main/${url}`,
     qs: { cors: true },
     form: data
   }, (err, res, body) => {
@@ -47,20 +50,35 @@ function bciRequest (method, url, data, cb) {
 
 // fetch all utxos for this address
 function fetchUtxos (address, cb) {
-  bciRequest('GET', `unspent?active=${address}`, null, (err, res) => {
-    // when there are no outputs for this address,
-    // blockchain API gives error 500 with this message:
-    if (err && res === 'No free outputs to spend') {
-      return cb(null, { utxos: [], amount: 0 })
-    }
+  let url = `addrs/${address}?unspentOnly=true&includeScript=true`
+  bcRequest('GET', url, null, (err, res) => {
     if (err) return cb(err)
     let amount = 0
-    for (let utxo of res.unspent_outputs) {
-      amount += utxo.value
+    let txrefs = []
+    if (res.txrefs) {
+      for (let utxo of res.txrefs) {
+        amount += utxo.value
+        txrefs = txrefs.concat(utxo)
+      }
     }
-    cb(null, { utxos: res.unspent_outputs, amount })
+    if (res.unconfirmed_txrefs) {
+      for (let utxo of res.unconfirmed_txrefs) {
+        amount += utxo.value
+        txrefs = txrefs.concat(utxo)
+      }
+    }
+    cb(null, { utxos: txrefs, amount })
   })
 }
+
+/*
+fetchUtxos('1FVKwUhENRdEPFFU7Jm6shBtGfdKUt6Yfu', (err, res) => {
+console.log(res)
+})
+fetchUtxos('1EaV33reN8XWWUfs5jkbGMD399vie5KQc4', (err, res) => {
+console.log(res)
+})
+*/
 
 function waitForPayment (address, cb) {
   const done = (err, res) => {
@@ -81,7 +99,7 @@ function waitForPayment (address, cb) {
 }
 
 function pushTx (txHex, cb) {
-  bciRequest('POST', 'pushtx', { tx: txHex }, cb)
+  bcRequest('POST', 'txs/push', { tx: txHex }, cb)
 }
 
 function createFinalTx (inputs, feeRate) {
@@ -109,10 +127,11 @@ function createFinalTx (inputs, feeRate) {
   let payToExodus = address.toOutputScript(EXODUS_ADDRESS)
   tx.addOutput(payToExodus, inputAmount - MINIMUM_OUTPUT)
 
-  // output to specify the Cosmos address. we set the address
+  // OP_RETURN data output to specify user's Cosmos address
+  // this output has a value of 0. we set the address
   // when we sign the transaction
-  let cosmosAddressScript = script.pubKeyHashOutput(Buffer(20).fill(0))
-  tx.addOutput(cosmosAddressScript, MINIMUM_OUTPUT)
+  let cosmosAddressScript = script.nullDataOutput(Buffer(20).fill(0))
+  tx.addOutput(cosmosAddressScript, 0)
 
   // deduct fee from exodus output
   let txLength = tx.byteLength() + tx.ins.length * 107 // account for input scripts
@@ -138,7 +157,7 @@ function signFinalTx (wallet, tx) {
 
   // set output script to specify user's Cosmos address
   let cosmosAddress = Buffer(wallet.addresses.cosmos, 'hex')
-  let cosmosAddressScript = script.pubKeyHashOutput(cosmosAddress)
+  let cosmosAddressScript = script.nullDataOutput(cosmosAddress)
   tx.outs[1].script = cosmosAddressScript
 
   // all utxos we spend from should have used this script
@@ -165,20 +184,21 @@ function sign (privKey, sigHash) {
 }
 
 function fetchFundraiserStats (cb) {
-  bciRequest('GET', `multiaddr?active=${EXODUS_ADDRESS}`, null, (err, res) => {
+  let url = `addrs/${EXODUS_ADDRESS}`
+  bcRequest('GET', url, null, (err, res) => {
     if (err) return cb(err)
-    let recentTxs = res.txs
-      .filter((tx) => tx.result > 0) // only show received txs
+    let recentTxs = res.txrefs
+      .filter((tx) => tx.tx_input_n < 0) // only show received txs
       .map((tx) => ({
-        hash: tx.hash,
-        donated: tx.result,
-        claimed: tx.result * ATOMS_PER_BTC / 1e8,
-        time: tx.time
+        hash: tx.tx_hash,
+        donated: tx.value,
+        claimed: tx.value * ATOMS_PER_BTC / 1e8,
+        time: tx.confirmed
       }))
     cb(null, {
-      amountDonated: res.addresses[0].total_received,
-      amountClaimed: res.addresses[0].total_received * ATOMS_PER_BTC / 1e8,
-      txCount: res.addresses[0].n_tx,
+      amountDonated: res.total_received,
+      amountClaimed: res.total_received * ATOMS_PER_BTC / 1e8,
+      txCount: res.n_tx,
       recentTxs
     })
   })
