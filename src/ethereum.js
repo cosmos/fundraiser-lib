@@ -50,11 +50,12 @@ var contractInstance = MyContract.at('0x00')
 
 // compute checksum for the transaction
 function addressChecksum (cosmosAddr, ethAddr) {
-  if (cosmosAddr == null || cosmosAddr.length !== 20) {
-    throw Error('Invalid cosmosAddr')
+  let addrlen = 20*2 + 2 // 0x prefixed hex
+  if (cosmosAddr == null || cosmosAddr.length !== addrlen) {
+    throw Error('Invalid cosmosAddr ' + cosmosAddr)
   }
-  if (ethAddr == null || ethAddr.length !== 20) {
-    throw Error('Invalid ethAddr')
+  if (ethAddr == null || ethAddr.length !== addrlen) {
+    throw Error('Invalid ethAddr ' + ethAddr)
   }
 
   // checksum is first 4 bytes of sha3(xor(cosmosAddr, ethAddr)
@@ -73,7 +74,7 @@ function addressChecksum (cosmosAddr, ethAddr) {
 function getTransactionData (cosmosAddr, ethAddr) {
   var checksum = addressChecksum(cosmosAddr, ethAddr)
 
-  return contractInstance.donate.getData(cosmosAddr, ethAddr, checksum)
+  return contractInstance.donate.getData(cosmosAddr, ethAddr, checksum).slice(0, (1+4+32+32+4)*2)
 }
 
 function getTransaction (cosmosAddr, ethAddr) {

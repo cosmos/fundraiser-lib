@@ -71,6 +71,7 @@ function derivePublicKeys (priv) {
   return { cosmos, bitcoin, ethereum }
 }
 
+// cosmos and eth are 0x hex, bitcoin is base58check
 function deriveAddresses (pub) {
   let cosmos = Cosmos.getAddress(pub.cosmos)
   let bitcoin = Bitcoin.getAddress(pub.bitcoin)
