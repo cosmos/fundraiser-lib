@@ -1,3 +1,5 @@
+'use strict'
+
 const Bitcoin = require('./bitcoin.js')
 
 // Same as a bitcoin address

@@ -1,3 +1,5 @@
+'use strict'
+
 const leftPad = require('left-pad')
 const request = require('request')
 const xor = require('bitwise-xor')
