@@ -121,10 +121,17 @@ function bciFetchUtxos (address, cb) {
     }
     if (err) return cb(err)
     let amount = 0
+    let utxos = []
     for (let utxo of res.unspent_outputs) {
       amount += utxo.value
+      utxos.push({
+        txid: utxo.tx_hash,
+        vout: utxo.tx_output_n,
+        scriptPubKey: utxo.script,
+        amount: utxo.value
+      })
     }
-    cb(null, { utxos: res.unspent_outputs, amount })
+    cb(null, { utxos: utxos, amount })
   })
 }
 
