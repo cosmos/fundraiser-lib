@@ -226,7 +226,7 @@ function createFinalTx (inputs, feeRate) {
   tx.outs[0].value -= feeAmount
 
   let paidAmount = inputAmount
-  let atomAmount = ((tx.outs[0].value + feeAmount + MINIMUM_OUTPUT) * ATOMS_PER_BTC) / 1e8 // the fee's on us, more atoms for you!
+  let atomAmount = ((tx.outs[0].value + MINIMUM_OUTPUT) * ATOMS_PER_BTC) / 1e8
   return { tx, paidAmount, feeAmount, atomAmount }
 }
 
@@ -303,7 +303,11 @@ module.exports = {
   getAddress160,
   getAddress,
   fetchUtxos,
+  insightFetchUtxos,
+  bciFetchUtxos,
   pushTx,
+  insightPushTx,
+  bciPushTx,
   waitForPayment,
   createFinalTx,
   signFinalTx,

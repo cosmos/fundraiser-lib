@@ -45,9 +45,9 @@ test('fetchUtxos', function (t) {
     })
   })
 
-  t.test('fetch utxos for known address', function (t) {
+  t.test('INSIGHT fetch utxos for known address', function (t) {
     var address = '16SGqiEVT1Jpc9UdkJBnhir1LDVxZoah8M'
-    bitcoin.fetchUtxos(address, function (err, res) {
+    bitcoin.insightFetchUtxos(address, function (err, res) {
       t.pass('callback called')
       t.error(err, 'no error')
       // t.ok(res.amount >= 2000, 'correct amount')
@@ -67,6 +67,42 @@ test('fetchUtxos', function (t) {
       t.equal(
         lastUtxo.amount, 1000,
         'correct utxo value')
+      t.end()
+    })
+  })
+
+  t.test('BCI fetch utxos for known address', function (t) {
+    var address = '16SGqiEVT1Jpc9UdkJBnhir1LDVxZoah8M'
+    bitcoin.bciFetchUtxos(address, function (err, res) {
+      t.pass('callback called')
+      t.error(err, 'no error')
+      t.ok(res.amount >= 2000, 'correct amount')
+      t.ok(res.utxos.length >= 2, 'correct utxo count')
+      var lastUtxo = res.utxos[res.utxos.length - 1]
+      t.equal(
+        lastUtxo.tx_hash,
+        'e5b399df6eec2f7093bdc16472a98768080ee7f61673b74524e2410bd00784da',
+        'correct utxo tx_hash value')
+      t.equal(
+        lastUtxo.tx_hash_big_endian,
+        'da8407d00b41e22445b77316f6e70e086887a97264c1bd93702fec6edf99b3e5',
+        'correct utxo tx_hash_big_endian value')
+      t.equal(
+        lastUtxo.tx_index, 229649052,
+        'correct utxo tx_index value')
+      t.equal(
+        lastUtxo.tx_output_n, 1,
+        'correct utxo tx_output_n value')
+      t.equal(
+        lastUtxo.script,
+        '76a9143ba0401a23d10bf40368b567c47fe03c49e9567388ac',
+        'correct utxo script value')
+      t.equal(
+        lastUtxo.value, 1000,
+        'correct utxo value')
+      t.equal(
+        lastUtxo.value_hex, '03e8',
+        'correct utxo value_hex value')
       t.end()
     })
   })
@@ -104,11 +140,20 @@ test('waitForPayment', function (t) {
 })
 
 test('pushTx', function (t) {
-  t.test('push invalid tx', function (t) {
+  t.test('INSIGHT push invalid tx', function (t) {
     var tx = Buffer(200).fill(0).toString('hex')
-    bitcoin.pushTx(tx, function (err) {
+    bitcoin.insightPushTx(tx, function (err) {
       t.ok(err, 'got error')
       t.equal(err.message, '16: bad-txns-vin-empty. Code:-26', 'correct error message')
+      t.end()
+    })
+  })
+
+  t.test('BCI push invalid tx', function (t) {
+    var tx = Buffer(200).fill(0).toString('hex')
+    bitcoin.bciPushTx(tx, function (err) {
+      t.ok(err, 'got error')
+      t.equal(err.message, 'Not accepting transaction version 0', 'correct error message')
       t.end()
     })
   })
@@ -148,7 +193,7 @@ test('createFinalTx', function (t) {
     t.ok(tx.tx, 'has tx property')
     t.equal(tx.paidAmount, 1000000, 'correct paidAmount')
     t.equal(tx.feeAmount, 49720, 'correct feeAmount')
-    t.equal(tx.atomAmount, 20, 'correct atomAmount')
+    t.equal(tx.atomAmount, 19.0056, 'correct atomAmount')
     t.end()
   })
 
