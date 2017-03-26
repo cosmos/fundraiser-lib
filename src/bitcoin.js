@@ -9,6 +9,7 @@ const DEV = process.env.NODE_ENV === 'development'
 const EXODUS_ADDRESS = '1EaV33reN8XWWUfs5jkbGMD399vie5KQc4'
 const MINIMUM_AMOUNT = DEV ? 60000 : 1000000 // min satoshis to send to exodus
 const ATOMS_PER_BTC = 2000
+const MINIMUM_OUTPUT = 1000
 const INSIGHT = true // use insight api
 
 // returns buffer
@@ -205,18 +206,17 @@ function createFinalTx (inputs, feeRate) {
 
   // pay to exodus address, spendable by Cosmos developers
   let payToExodus = address.toOutputScript(EXODUS_ADDRESS)
-  tx.addOutput(payToExodus, inputAmount)
+  tx.addOutput(payToExodus, inputAmount - MINIMUM_OUTPUT)
 
-  // OP_RETURN data output to specify user's Cosmos address
-  // this output has a value of 0. we set the address
+  // output to specify the Cosmos address. we set the address
   // when we sign the transaction
-  let cosmosAddressScript = script.nullDataOutput(Buffer(20).fill(0))
-  tx.addOutput(cosmosAddressScript, 0)
+  let cosmosAddressScript = script.pubKeyHashOutput(Buffer(20).fill(0))
+  tx.addOutput(cosmosAddressScript, MINIMUM_OUTPUT)
 
   // deduct fee from exodus output
   let txLength = tx.byteLength() + tx.ins.length * 107 // account for input scripts
   let feeAmount = txLength * feeRate
-  if (tx.outs[0].value - feeAmount < 0) {
+  if (tx.outs[0].value - feeAmount < MINIMUM_OUTPUT) {
     throw Error(`Not enough coins given to pay fee.
       tx length=${txLength}
       fee rate=${feeRate} satoshi/byte
@@ -226,7 +226,7 @@ function createFinalTx (inputs, feeRate) {
   tx.outs[0].value -= feeAmount
 
   let paidAmount = inputAmount
-  let atomAmount = (tx.outs[0].value * ATOMS_PER_BTC) / 1e8
+  let atomAmount = ((tx.outs[0].value + feeAmount + MINIMUM_OUTPUT) * ATOMS_PER_BTC) / 1e8 // the fee's on us, more atoms for you!
   return { tx, paidAmount, feeAmount, atomAmount }
 }
 
@@ -237,7 +237,7 @@ function signFinalTx (wallet, tx) {
 
   // set output script to specify user's Cosmos address
   let cosmosAddress = Buffer(wallet.addresses.cosmos.slice(2), 'hex')
-  let cosmosAddressScript = script.nullDataOutput(cosmosAddress)
+  let cosmosAddressScript = script.pubKeyHashOutput(cosmosAddress)
   tx.outs[1].script = cosmosAddressScript
 
   // all utxos we spend from should have used this script
@@ -310,5 +310,6 @@ module.exports = {
   fetchFundraiserStats,
   fetchFeeRate,
   MINIMUM_AMOUNT,
+  MINIMUM_OUTPUT,
   ATOMS_PER_BTC
 }
