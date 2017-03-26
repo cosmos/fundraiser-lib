@@ -207,7 +207,8 @@ function createFinalTx (inputs, feeRate) {
 
   // add inputs from intermediate tx
   for (let output of inputs) {
-    let txid = Buffer(output.txid, 'hex')
+    let txhashhex = output.txid.match(/.{2}/g).reverse().join('') // Reverse the hex string
+    let txid = Buffer(txhashhex, 'hex')
     tx.addInput(txid, output.vout)
   }
 
