@@ -137,10 +137,10 @@ test('pushTx', function (t) {
 test('createFinalTx', function (t) {
   t.test('create final tx with insufficient inputs for fee', function (t) {
     var utxos = [{
-      tx_hash: randomBytes(32).toString('hex'),
-      script: randomBytes(32).toString('hex'),
-      tx_output_n: 0,
-      value: 10000000
+      txid: randomBytes(32).toString('hex'),
+      scriptPubKey: randomBytes(32).toString('hex'),
+      vout: 0,
+      amount: 10000000
     }]
     try {
       // we use a very high fee rate
@@ -156,10 +156,10 @@ test('createFinalTx', function (t) {
   t.test('create final tx', function (t) {
     // we use a ton of inputs to make the fee very high
     var utxos = [{
-      tx_hash: randomBytes(32).toString('hex'),
-      script: randomBytes(32).toString('hex'),
-      tx_output_n: 0,
-      value: 1000000
+      txid: randomBytes(32).toString('hex'),
+      scriptPubKey: randomBytes(32).toString('hex'),
+      vout: 0,
+      amount: 1000000
     }]
     var tx = bitcoin.createFinalTx(utxos, 220)
     t.ok(tx, 'created tx')

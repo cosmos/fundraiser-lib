@@ -124,8 +124,8 @@ function bciFetchUtxos (address, cb) {
     let utxos = []
     for (let utxo of res.unspent_outputs) {
       amount += utxo.value
-      utxos.push({
-        txid: utxo.tx_hash,
+      utxos.unshift({
+        txid: utxo.tx_hash_big_endian,
         vout: utxo.tx_output_n,
         scriptPubKey: utxo.script,
         amount: utxo.value
@@ -192,7 +192,7 @@ function waitForPayment (address, cb) {
 
 function createFinalTx (inputs, feeRate) {
   let inputAmount = 0
-  for (let input of inputs) inputAmount += input.value
+  for (let input of inputs) inputAmount += input.amount
 
   if (inputAmount < MINIMUM_AMOUNT) {
     throw Error(`Intermediate tx is smaller than minimum.
@@ -207,8 +207,8 @@ function createFinalTx (inputs, feeRate) {
 
   // add inputs from intermediate tx
   for (let output of inputs) {
-    let txid = Buffer(output.tx_hash, 'hex')
-    tx.addInput(txid, output.tx_output_n)
+    let txid = Buffer(output.txid, 'hex')
+    tx.addInput(txid, output.vout)
   }
 
   // pay to exodus address, spendable by Cosmos developers
