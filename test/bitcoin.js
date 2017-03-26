@@ -130,7 +130,7 @@ test('createFinalTx', function (t) {
       t.fail('should have thrown')
     } catch (err) {
       t.ok(err, 'error thrown')
-      t.equal(err.message, 'Not enough coins given to pay fee.\n      tx length=226\n      fee rate=10000000 satoshi/byte\n      fee amount=2260000000 satoshis\n      output amount=9999000 satoshis', 'correct error message')
+      t.equal(err.message, 'Not enough coins given to pay fee.\n      tx length=223\n      fee rate=10000000 satoshi/byte\n      fee amount=2230000000 satoshis\n      output amount=10000000 satoshis', 'correct error message')
     }
     t.end()
   })
@@ -147,8 +147,8 @@ test('createFinalTx', function (t) {
     t.ok(tx, 'created tx')
     t.ok(tx.tx, 'has tx property')
     t.equal(tx.paidAmount, 1000000, 'correct paidAmount')
-    t.equal(tx.feeAmount, 49720, 'correct feeAmount')
-    t.equal(tx.atomAmount, 18.9856, 'correct atomAmount')
+    t.equal(tx.feeAmount, 49060, 'correct feeAmount')
+    t.equal(tx.atomAmount, 19.0188, 'correct atomAmount')
     t.end()
   })
 
