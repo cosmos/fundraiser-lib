@@ -184,9 +184,9 @@ function fetchUtxos (address, cb) {
 
 function waitForPayment (address, cb) {
   if (INSIGHT) {
-    insightWaitForPayment(address, cb)
+    return insightWaitForPayment(address, cb)
   } else {
-    bciWaitForPayment(address, cb)
+    return bciWaitForPayment(address, cb)
   }
 }
 
