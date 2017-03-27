@@ -117,14 +117,9 @@ function ethCall (address, method, cb) {
 
 // fetch the current atomRate
 function fetchAtomRate (address, cb) {
-  let txData = web3.sha3('atomRate()').slice(0, 10) // '0xf5c96216'
-  esiRequest('api?module=proxy&action=eth_call', {
-    to: address,
-    data: txData,
-    tag: 'latest'
-  }, (err, res) => {
+  ethCall(address, 'weiPerAtom', (err, res) => {
     if (err) return cb(err)
-    cb(null, parseInt(res.result, 16))
+    cb(null, parseInt(res, 16))
   })
 }
 
@@ -134,7 +129,7 @@ function fetchTotals (address, cb) {
   ethCall(address, 'totalAtom', (err, res) => {
     if (err) return cb(err)
     let atoms = parseInt(res, 16) / divisor
-    ethCall(address, 'totalEther', (err, res) => {
+    ethCall(address, 'totalWei', (err, res) => {
       if (err) return cb(err)
       let ether = parseInt(res, 16) / divisor
       cb(null, { ether, atoms })
