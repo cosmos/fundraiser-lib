@@ -9,7 +9,7 @@ var web3 = new Web3()
 
 const { sha3 } = require('./hash.js')
 
-const FUNDRAISER_CONTRACT = '0xABb1fE24C9B384f8BC8e778e165D50539589BCe6'
+const FUNDRAISER_CONTRACT = '0xa4028F2aec0ad18964e368338E5268FebB4F5423'
 const GAS_LIMIT = 150000
 const MIN_DONATION = 1
 
