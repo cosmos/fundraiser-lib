@@ -6,7 +6,7 @@ const { sha2, ripemd160 } = require('./hash.js')
 const { byte, concat } = require('./util.js')
 
 const DEV = process.env.NODE_ENV === 'development'
-const EXODUS_ADDRESS = '1EaV33reN8XWWUfs5jkbGMD399vie5KQc4'
+const EXODUS_ADDRESS = '15ZcBgrLnjXsHGCv7iiVcxhCf9xK9xQu4B'
 const MINIMUM_AMOUNT = DEV ? 60000 : 1000000 // min satoshis to send to exodus
 const ATOMS_PER_BTC = 2000
 const MINIMUM_OUTPUT = 1000
