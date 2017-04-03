@@ -1,3 +1,5 @@
+'use strict'
+
 const bs58check = require('bs58check')
 const { Transaction, script, address } = require('bitcoinjs-lib')
 const request = require('request')
