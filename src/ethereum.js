@@ -14,7 +14,6 @@ const FUNDRAISER_CONTRACT = '0x168787143E383A7EC5df0D1787048F7Ab794a260'
 const GAS_LIMIT = 150000
 const MIN_DONATION = 1
 
-const ETH_NODE = 'true'
 const ETH_URL = `${BASE_URL}/eth`
 
 // returns 0x prefixed hex address
@@ -97,33 +96,15 @@ function getTransaction (cosmosAddr, ethAddr) {
 // ---------------------------
 // request from our node
 
-function ethRequest (method, qs, cb) {
+function ethCall (address, method, cb) {
   return request({
-    url: `${ETH_URL}`,
-    method: 'POST',
-    body: {
-      'id': 1,
-      'jsonrpc': '2.0',
-      'method': method,
-      'params': [qs]
-    },
+    url: `${ETH_URL}/${method}`,
     json: true
   }, (err, res, body) => {
     if (err || res.statusCode !== 200 || body.error) {
       return cb(err || body.error || Error(res.statusCode), body)
     }
-    cb(null, body)
-  })
-}
-
-function ethCall (address, method, cb) {
-  let data = web3.sha3(`${method}()`).slice(0, 10)
-  ethRequest('eth_call', {
-    to: address,
-    data
-  }, (err, res) => {
-    if (err) return cb(err)
-    cb(null, res.result)
+    cb(null, body.result)
   })
 }
 
@@ -165,57 +146,15 @@ function esiRequest (url, qs, cb) {
   })
 }
 
-function esiCall (address, method, cb) {
-  let data = web3.sha3(`${method}()`).slice(0, 10)
-  esiRequest('api?module=proxy&action=eth_call', {
-    to: address,
-    data,
-    tag: 'latest'
-  }, (err, res) => {
-    if (err) return cb(err)
-    cb(null, res.result)
-  })
-}
-
-// fetch the current atomRate
-function esiFetchAtomRate (address, cb) {
-  esiCall(address, 'weiPerAtom', (err, res) => {
-    if (err) return cb(err)
-    cb(null, parseInt(res, 16))
-  })
-}
-
-// fetch the total raised and total atoms
-function esiFetchTotals (address, cb) {
-  let divisor = 1e18
-  esiCall(address, 'totalAtom', (err, res) => {
-    if (err) return cb(err)
-    let atoms = parseInt(res, 16) / divisor
-    esiCall(address, 'totalWei', (err, res) => {
-      if (err) return cb(err)
-      let ether = parseInt(res, 16) / divisor
-      cb(null, { ether, atoms })
-    })
-  })
-}
-
 // ------------------------
 // network requests
 
 function fetchAtomRate (address, cb) {
-  if (ETH_NODE) {
-    ethFetchAtomRate(address, cb)
-  } else {
-    esiFetchAtomRate(address, cb)
-  }
+  ethFetchAtomRate(address, cb)
 }
 
 function fetchTotals (address, cb) {
-  if (ETH_NODE) {
-    ethFetchTotals(address, cb)
-  } else {
-    esiFetchTotals(address, cb)
-  }
+  ethFetchTotals(address, cb)
 }
 
 // TODO: limit so it doesn't fetch all txs
