@@ -3,6 +3,7 @@
 const leftPad = require('left-pad')
 const request = require('request')
 const xor = require('bitwise-xor')
+const { BASE_URL } = require('./util.js')
 
 var Web3 = require('web3')
 var web3 = new Web3()
@@ -14,7 +15,7 @@ const GAS_LIMIT = 150000
 const MIN_DONATION = 1
 
 const ETH_NODE = 'true'
-const ETH_URL = '/eth'
+const ETH_URL = `${BASE_URL}/eth`
 
 // returns 0x prefixed hex address
 function getAddress (pub) {

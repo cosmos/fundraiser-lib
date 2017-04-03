@@ -3,7 +3,7 @@ const { Transaction, script, address } = require('bitcoinjs-lib')
 const request = require('request')
 const secp256k1 = require('secp256k1')
 const { sha2, ripemd160 } = require('./hash.js')
-const { byte, concat } = require('./util.js')
+const { BASE_URL, byte, concat } = require('./util.js')
 
 const DEV = process.env.NODE_ENV === 'development'
 const EXODUS_ADDRESS = '15ZcBgrLnjXsHGCv7iiVcxhCf9xK9xQu4B'
@@ -11,7 +11,7 @@ const MINIMUM_AMOUNT = DEV ? 60000 : 1000000 // min satoshis to send to exodus
 const ATOMS_PER_BTC = 2000
 const MINIMUM_OUTPUT = 1000
 const INSIGHT = true // use insight api
-const INSIGHT_URL = '/insight-api'
+const INSIGHT_URL = `${BASE_URL}/insight-api`
 
 // returns buffer
 function getAddress160 (pub) {
