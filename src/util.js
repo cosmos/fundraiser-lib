@@ -27,5 +27,5 @@ function xor(a, b) {
 module.exports = {
   byte,
   concat,
-	xor
+  xor
 }

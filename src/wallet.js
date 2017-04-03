@@ -20,9 +20,9 @@ function splitMnemonic (mnemonic) {
   let oneBuf = new Buffer(oneHex, 'hex')
   let twoBuf = xor(eBuf, oneBuf)
   let twoHex = twoBuf.toString('hex')
-	let two = bip39.entropyToMnemonic(twoHex)
+  let two = bip39.entropyToMnemonic(twoHex)
   //console.log(oneHex, twoHex, "<<", eHex)
-	return { one, two }
+  return { one, two }
 }
 
 function joinMnemonic (one, two) {
@@ -30,11 +30,11 @@ function joinMnemonic (one, two) {
   let oneBuf = new Buffer(oneHex, 'hex')
   let twoHex = bip39.mnemonicToEntropy(two)
   let twoBuf = new Buffer(twoHex, 'hex')
-	let eBuf = xor(oneBuf, twoBuf)
+  let eBuf = xor(oneBuf, twoBuf)
   let eHex = eBuf.toString('hex')
   //console.log(oneHex, twoHex, ">>", eHex)
-	let mnemonic = bip39.entropyToMnemonic(eHex)
-	return mnemonic
+  let mnemonic = bip39.entropyToMnemonic(eHex)
+  return mnemonic
 }
 
 function deriveWallet (mnemonic) {
