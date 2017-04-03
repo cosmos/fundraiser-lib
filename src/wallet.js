@@ -6,9 +6,35 @@ const Cosmos = require('./cosmos.js')
 const Ethereum = require('./ethereum.js')
 const bip39 = require('bip39')
 const { HDNode } = require('bitcoinjs-lib')
+const { xor } = require('./util.js')
 
 function generateMnemonic () {
   return bip39.generateMnemonic()
+}
+
+function splitMnemonic (mnemonic) {
+  let eHex = bip39.mnemonicToEntropy(mnemonic)
+  let eBuf = new Buffer(eHex, 'hex')
+  let one = bip39.generateMnemonic()
+  let oneHex = bip39.mnemonicToEntropy(one)
+  let oneBuf = new Buffer(oneHex, 'hex')
+  let twoBuf = xor(eBuf, oneBuf)
+  let twoHex = twoBuf.toString('hex')
+	let two = bip39.entropyToMnemonic(twoHex)
+  //console.log(oneHex, twoHex, "<<", eHex)
+	return { one, two }
+}
+
+function joinMnemonic (one, two) {
+  let oneHex = bip39.mnemonicToEntropy(one)
+  let oneBuf = new Buffer(oneHex, 'hex')
+  let twoHex = bip39.mnemonicToEntropy(two)
+  let twoBuf = new Buffer(twoHex, 'hex')
+	let eBuf = xor(oneBuf, twoBuf)
+  let eHex = eBuf.toString('hex')
+  //console.log(oneHex, twoHex, ">>", eHex)
+	let mnemonic = bip39.entropyToMnemonic(eHex)
+	return mnemonic
 }
 
 function deriveWallet (mnemonic) {
@@ -81,6 +107,8 @@ function deriveAddresses (pub) {
 
 module.exports = {
   generateMnemonic,
+  splitMnemonic,
+  joinMnemonic,
   deriveWallet
 }
 
