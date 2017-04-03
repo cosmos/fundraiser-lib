@@ -11,7 +11,7 @@ const MINIMUM_AMOUNT = DEV ? 60000 : 1000000 // min satoshis to send to exodus
 const ATOMS_PER_BTC = 2000
 const MINIMUM_OUTPUT = 1000
 const INSIGHT = true // use insight api
-const INSIGHT_URL = 'http://52.60.171.236:3001/insight-api' // 'http://bitcore1.interblock.io:3001/insight-api'
+const INSIGHT_URL = 'http://cosmos.interblock.io/insight-api' // http://52.60.171.236:3001/insight-api' // 'http://bitcore1.interblock.io:3001/insight-api'
 
 // returns buffer
 function getAddress160 (pub) {
