@@ -21,7 +21,6 @@ function splitMnemonic (mnemonic) {
   let twoBuf = xor(eBuf, oneBuf)
   let twoHex = twoBuf.toString('hex')
   let two = bip39.entropyToMnemonic(twoHex)
-  //console.log(oneHex, twoHex, "<<", eHex)
   return { one, two }
 }
 
@@ -32,7 +31,6 @@ function joinMnemonic (one, two) {
   let twoBuf = new Buffer(twoHex, 'hex')
   let eBuf = xor(oneBuf, twoBuf)
   let eHex = eBuf.toString('hex')
-  //console.log(oneHex, twoHex, ">>", eHex)
   let mnemonic = bip39.entropyToMnemonic(eHex)
   return mnemonic
 }

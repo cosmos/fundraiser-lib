@@ -124,13 +124,13 @@ test('derive wallet keys/addresses', function (t) {
 test('mnemonic split and join', function (t) {
   for (var i = 0; i < 1000; i++) {
     var mnemonic = cfr.generateMnemonic()
-    t.equal(mnemonic.split(" ").length, 12, 'correct mnemonic length')
+    t.equal(mnemonic.split(' ').length, 12, 'correct mnemonic length')
     var {one, two} = cfr.splitMnemonic(mnemonic)
-    t.equal(one.split(" ").length, 12, 'correct one length')
-    t.equal(two.split(" ").length, 12, 'correct two length')
+    t.equal(one.split(' ').length, 12, 'correct one length')
+    t.equal(two.split(' ').length, 12, 'correct two length')
     var joined = cfr.joinMnemonic(one, two)
     t.equal(mnemonic, joined, 'correct join')
-    console.log("---\n", mnemonic, "\n", one, "\n", two)
+    console.log('---\n', mnemonic, '\n', one, '\n', two)
   }
   t.end()
 })
