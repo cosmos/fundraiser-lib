@@ -14,7 +14,7 @@ const GAS_LIMIT = 150000
 const MIN_DONATION = 1
 
 const ETH_NODE = 'true'
-const ETH_URL = 'http://cosmos.interblock.io/eth' // 'http://ethereum1.interblock.io:8545'
+const ETH_URL = '/eth'
 
 // returns 0x prefixed hex address
 function getAddress (pub) {

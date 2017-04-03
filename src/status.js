@@ -2,7 +2,7 @@
 
 const request = require('request')
 
-const STATUS_URL = 'http://cosmos.interblock.io/status.json' // 'http://192.241.203.245:8080/status.json'
+const STATUS_URL = '/status.json'
 
 module.exports = function (cb) {
   request({
