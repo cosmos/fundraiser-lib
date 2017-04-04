@@ -7,9 +7,22 @@ const Ethereum = require('./ethereum.js')
 const bip39 = require('bip39')
 const { HDNode } = require('bitcoinjs-lib')
 const { xor } = require('./util.js')
+const { sha2 } = require('./hash.js')
+const entropySalt = 'YOU COULD REPLACE THIS WITH ANYTHING'
 
 function generateMnemonic () {
-  return bip39.generateMnemonic()
+  let mnemonic = bip39.generateMnemonic()
+  let entropyHex = bip39.mnemonicToEntropy(mnemonic)
+  let entropyBuf = new Buffer(entropyHex, 'hex')
+  // console.log("before", entropyBuf, mnemonic)
+  let salt = sha2(entropySalt)
+  salt = salt.slice(0,16)
+  // console.log("salt", salt)
+  entropyBuf = xor(entropyBuf, new Buffer(salt))
+  entropyHex = entropyBuf.toString('hex')
+  mnemonic = bip39.entropyToMnemonic(entropyHex)
+  // console.log("after", entropyBuf, mnemonic)
+  return mnemonic
 }
 
 function splitMnemonic (mnemonic) {
