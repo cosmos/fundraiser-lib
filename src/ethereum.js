@@ -133,9 +133,9 @@ function ethFetchTotals (address, cb) {
 // ------------------------
 // print eth function sigs
 
-function ethMethodSig(methodName) {
-  console.log(methodName, web3.sha3(`${methodName}()`).slice(0, 10))
-}
+// function ethMethodSig (methodName) {
+//   console.log(methodName, web3.sha3(`${methodName}()`).slice(0, 10))
+// }
 
 /*
 ethMethodSig('weiPerAtom')
@@ -155,6 +155,14 @@ function fetchTotals (address, cb) {
   ethFetchTotals(address, cb)
 }
 
+function fetchNumDonations (address, cb) {
+  ethCall(address, 'numDonations', (err, res) => {
+    if (err) return cb(err)
+    if (res === '0x') return cb(null, 0)
+    cb(null, parseInt(res, 16))
+  })
+}
+
 module.exports = {
   getAddress,
   getTransaction,
@@ -163,6 +171,7 @@ module.exports = {
 
   fetchAtomRate,
   fetchTotals,
+  fetchNumDonations,
   FUNDRAISER_CONTRACT,
   MIN_DONATION
 }
