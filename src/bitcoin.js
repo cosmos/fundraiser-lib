@@ -209,6 +209,17 @@ function fetchFeeRate (cb) {
   })
 }
 
+function fetchFundraiserStats (cb) {
+  insightRequest('GET', `addr/${EXODUS_ADDRESS}/totalReceived`, null, (err, amountDonated) => {
+    if (err) return cb(err)
+    cb(null, {
+      amountDonated,
+      amountClaimed: amountDonated * ATOMS_PER_BTC / 1e8,
+      txCount: 0 // TODO
+    })
+  })
+}
+
 module.exports = {
   getAddress160,
   getAddress,
@@ -220,6 +231,7 @@ module.exports = {
   createFinalTx,
   signFinalTx,
   fetchFeeRate,
+  fetchFundraiserStats,
   MINIMUM_AMOUNT,
   MINIMUM_OUTPUT,
   ATOMS_PER_BTC
