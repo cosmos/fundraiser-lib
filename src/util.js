@@ -10,8 +10,6 @@ if (process.env.COSMOS_BASE_URL) {
   BASE_URL = 'https://cosmos.interblock.io'
 }
 
-console.log('base', BASE_URL)
-
 function byte (n) {
   return Buffer([ n ])
 }
