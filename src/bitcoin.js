@@ -147,7 +147,7 @@ function createFinalTx (inputs, feeRate) {
   // deduct fee from exodus output
   let txLength = tx.byteLength() + tx.ins.length * 107 // account for input scripts
   let feeAmount = txLength * feeRate
-  if (tx.outs[0].value - feeAmount < 0) {
+  if (tx.outs[0].value - feeAmount < MINIMUM_OUTPUT) {
     throw Error(`Not enough coins given to pay fee.
       tx length=${txLength}
       fee rate=${feeRate} satoshi/byte
