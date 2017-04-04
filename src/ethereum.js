@@ -130,6 +130,23 @@ function ethFetchTotals (address, cb) {
   })
 }
 
+// fetch the number of donations
+function ethFetchNumDonations (address, cb) {
+  ethCall(address, 'numDonations', (err, res) => {
+    if (err) return cb(err)
+    if (res === '0x') return cb(null, 0)
+    cb(null, parseInt(res, 16))
+  })
+}
+
+// fetch the isActive state
+function ethFetchIsActive (address, cb) {
+  ethCall(address, 'isActive', (err, res) => {
+    if (err) return cb(err)
+    cb(null, parseInt(res, 16))
+  })
+}
+
 // ------------------------
 // print eth function sigs
 
@@ -157,11 +174,11 @@ function fetchTotals (address, cb) {
 }
 
 function fetchNumDonations (address, cb) {
-  ethCall(address, 'numDonations', (err, res) => {
-    if (err) return cb(err)
-    if (res === '0x') return cb(null, 0)
-    cb(null, parseInt(res, 16))
-  })
+  ethFetchNumDonations(address, cb)
+}
+
+function fetchIsActive (address, cb) {
+  ethFetchIsActive(address, cb)
 }
 
 module.exports = {
@@ -173,6 +190,8 @@ module.exports = {
   fetchAtomRate,
   fetchTotals,
   fetchNumDonations,
+  fetchIsActive,
+
   FUNDRAISER_CONTRACT,
   MIN_DONATION
 }

@@ -2,18 +2,17 @@
 
 const request = require('request')
 const { BASE_URL } = require('./util.js')
+const { fetchIsActive } = require('./ethereum.js')
 
 const STATUS_URL = `${BASE_URL}/status.json`
 
 module.exports = function (cb) {
-  request({
-    url: STATUS_URL,
-    json: true
-  }, (err, res, body) => {
+  fetchIsActive("", (err, res) => {
     if (err) return cb(err)
-    if (res.statusCode !== 200) {
-      return cb(Error(res.statusCode))
+    if (res){
+      cb(null, { fundraiserEnded: false })
+    } else {
+      cb(null, { fundraiserEnded: true })
     }
-    cb(null, body)
   })
 }
