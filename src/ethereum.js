@@ -131,6 +131,20 @@ function ethFetchTotals (address, cb) {
 }
 
 // ------------------------
+// print eth function sigs
+
+function ethMethodSig(methodName) {
+  console.log(methodName, web3.sha3(`${methodName}()`).slice(0, 10))
+}
+
+/*
+ethMethodSig('weiPerAtom')
+ethMethodSig('totalAtom')
+ethMethodSig('totalWei')
+ethMethodSig('numDonations')
+*/
+
+// ------------------------
 // network requests
 
 function fetchAtomRate (address, cb) {
