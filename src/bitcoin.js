@@ -195,17 +195,15 @@ function sign (privKey, sigHash) {
 }
 
 function fetchFeeRate (cb) {
-  request({
-    url: 'https://bitcoinfees.21.co/api/v1/fees/recommended',
-    json: true
-  }, (err, res, body) => {
-    if (err || res.statusCode !== 200) {
-      // return cb(err || Error(res.statusCode), body)
+  insightRequest('GET', 'utils/estimateFee', null, (err, res) => {
+    if (err) {
       // By default, pay 400
       return cb(null, 400)
     }
+    let satoshiPerKb = res['2'] * 1e8
+    let satoshiPerByte = Math.ceil(satoshiPerKb / 1000)
     // Pay double the fee.
-    let feeRate = body.halfHourFee * 2
+    let feeRate = satoshiPerByte * 2
     if (feeRate < 300) {
       return cb(null, 300)
     }
