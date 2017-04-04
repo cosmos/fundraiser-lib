@@ -130,22 +130,6 @@ function ethFetchTotals (address, cb) {
   })
 }
 
-// ---------------------------
-// request from etherscan.io
-
-function esiRequest (url, qs, cb) {
-  return request({
-    url: `https://api.etherscan.io/${url}`,
-    qs,
-    json: true
-  }, (err, res, body) => {
-    if (err || res.statusCode !== 200 || body.error) {
-      return cb(err || body.error || Error(res.statusCode), body)
-    }
-    cb(null, body)
-  })
-}
-
 // ------------------------
 // network requests
 
@@ -157,19 +141,6 @@ function fetchTotals (address, cb) {
   ethFetchTotals(address, cb)
 }
 
-// TODO: limit so it doesn't fetch all txs
-function fetchTxs (address, cb) {
-  esiRequest('api?module=account&action=txlist', {
-    address,
-    startblock: 0,
-    endblock: 99999999,
-    sort: 'desc'
-  }, (err, res) => {
-    if (err) return cb(err)
-    cb(null, res.result)
-  })
-}
-
 module.exports = {
   getAddress,
   getTransaction,
@@ -178,7 +149,6 @@ module.exports = {
 
   fetchAtomRate,
   fetchTotals,
-  fetchTxs,
   FUNDRAISER_CONTRACT,
   MIN_DONATION
 }

@@ -12,7 +12,6 @@ const EXODUS_ADDRESS = '15ZcBgrLnjXsHGCv7iiVcxhCf9xK9xQu4B'
 const MINIMUM_AMOUNT = DEV ? 60000 : 1000000 // min satoshis to send to exodus
 const ATOMS_PER_BTC = 2000
 const MINIMUM_OUTPUT = 1000
-const INSIGHT = true // use insight api
 const INSIGHT_URL = `${BASE_URL}/insight-api`
 
 // returns buffer
@@ -95,101 +94,19 @@ function insightPushTx (txHex, cb) {
   insightRequest('POST', 'tx/send', { rawtx: txHex }, cb)
 }
 
-// -------------------
-// blockchain.info
-
-function bciRequest (method, url, data, cb) {
-  return request({
-    method,
-    url: `https://blockchain.info/${url}`,
-    qs: { cors: true },
-    form: data
-  }, (err, res, body) => {
-    if (err) return cb(err)
-    if (res.statusCode !== 200) {
-      return cb(Error(body || res.statusCode), body)
-    }
-    try {
-      body = JSON.parse(body)
-    } catch (err) {}
-    cb(null, body)
-  })
-}
-
-// fetch all utxos for this address
-function bciFetchUtxos (address, cb) {
-  bciRequest('GET', `unspent?active=${address}`, null, (err, res) => {
-    // when there are no outputs for this address,
-    // blockchain API gives error 500 with this message:
-    if (err && res === 'No free outputs to spend') {
-      return cb(null, { utxos: [], amount: 0 })
-    }
-    if (err) return cb(err)
-    let amount = 0
-    let utxos = []
-    for (let utxo of res.unspent_outputs) {
-      amount += utxo.value
-      utxos.unshift({
-        txid: utxo.tx_hash_big_endian,
-        vout: utxo.tx_output_n,
-        scriptPubKey: utxo.script,
-        amount: utxo.value
-      })
-    }
-    cb(null, { utxos: utxos, amount })
-  })
-}
-
-function bciWaitForPayment (address, cb) {
-  let cbCalled = false
-  const done = (err, res) => {
-    if (cbCalled) return
-    cbCalled = true
-    clearInterval(interval)
-    cb(err, res)
-  }
-  const checkForUnspent = () => {
-    bciFetchUtxos(address, (err, res) => {
-      if (err) return done(err)
-      if (res.amount < MINIMUM_AMOUNT) return
-      done(null, res)
-    })
-  }
-  // poll once every 6 seconds
-  let interval = setInterval(checkForUnspent, 6000)
-  checkForUnspent()
-  return interval
-}
-
-function bciPushTx (txHex, cb) {
-  bciRequest('POST', 'pushtx', { tx: txHex }, cb)
-}
-
 // ------------------------
 // network requests
 
 function pushTx (txHex, cb) {
-  if (INSIGHT) {
-    insightPushTx(txHex, cb)
-  } else {
-    bciPushTx(txHex, cb)
-  }
+  insightPushTx(txHex, cb)
 }
 
 function fetchUtxos (address, cb) {
-  if (INSIGHT) {
-    insightFetchUtxos(address, cb)
-  } else {
-    bciFetchUtxos(address, cb)
-  }
+  insightFetchUtxos(address, cb)
 }
 
 function waitForPayment (address, cb) {
-  if (INSIGHT) {
-    return insightWaitForPayment(address, cb)
-  } else {
-    return bciWaitForPayment(address, cb)
-  }
+  return insightWaitForPayment(address, cb)
 }
 
 // ---------------------
@@ -276,26 +193,6 @@ function sign (privKey, sigHash) {
   return secp256k1.signatureExport(signature) // convert to DER encoding
 }
 
-function fetchFundraiserStats (cb) {
-  bciRequest('GET', `multiaddr?active=${EXODUS_ADDRESS}`, null, (err, res) => {
-    if (err) return cb(err)
-    let recentTxs = res.txs
-      .filter((tx) => tx.result > 0) // only show received txs
-      .map((tx) => ({
-        hash: tx.hash,
-        donated: tx.result,
-        claimed: tx.result * ATOMS_PER_BTC / 1e8,
-        time: tx.time
-      }))
-    cb(null, {
-      amountDonated: res.addresses[0].total_received,
-      amountClaimed: res.addresses[0].total_received * ATOMS_PER_BTC / 1e8,
-      txCount: res.addresses[0].n_tx,
-      recentTxs
-    })
-  })
-}
-
 function fetchFeeRate (cb) {
   request({
     url: 'https://bitcoinfees.21.co/api/v1/fees/recommended',
@@ -317,14 +214,11 @@ module.exports = {
   getAddress,
   fetchUtxos,
   insightFetchUtxos,
-  bciFetchUtxos,
   pushTx,
   insightPushTx,
-  bciPushTx,
   waitForPayment,
   createFinalTx,
   signFinalTx,
-  fetchFundraiserStats,
   fetchFeeRate,
   MINIMUM_AMOUNT,
   MINIMUM_OUTPUT,
