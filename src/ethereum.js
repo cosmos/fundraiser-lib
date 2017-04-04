@@ -3,15 +3,18 @@
 const leftPad = require('left-pad')
 const request = require('request')
 const xor = require('bitwise-xor')
+const { BASE_URL } = require('./util.js')
 
 var Web3 = require('web3')
 var web3 = new Web3()
 
 const { sha3 } = require('./hash.js')
 
-const FUNDRAISER_CONTRACT = '0xa4028F2aec0ad18964e368338E5268FebB4F5423'
+const FUNDRAISER_CONTRACT = '0x168787143E383A7EC5df0D1787048F7Ab794a260'
 const GAS_LIMIT = 150000
 const MIN_DONATION = 1
+
+const ETH_URL = `${BASE_URL}/eth`
 
 // returns 0x prefixed hex address
 function getAddress (pub) {
@@ -90,33 +93,23 @@ function getTransaction (cosmosAddr, ethAddr) {
   }
 }
 
-function esiRequest (url, qs, cb) {
+// ---------------------------
+// request from our node
+
+function ethCall (address, method, cb) {
   return request({
-    url: `https://api.etherscan.io/${url}`,
-    qs,
+    url: `${ETH_URL}/${method}`,
     json: true
   }, (err, res, body) => {
     if (err || res.statusCode !== 200 || body.error) {
       return cb(err || body.error || Error(res.statusCode), body)
     }
-    cb(null, body)
-  })
-}
-
-function ethCall (address, method, cb) {
-  let data = web3.sha3(`${method}()`).slice(0, 10)
-  esiRequest('api?module=proxy&action=eth_call', {
-    to: address,
-    data,
-    tag: 'latest'
-  }, (err, res) => {
-    if (err) return cb(err)
-    cb(null, res.result)
+    cb(null, body.result)
   })
 }
 
 // fetch the current atomRate
-function fetchAtomRate (address, cb) {
+function ethFetchAtomRate (address, cb) {
   ethCall(address, 'weiPerAtom', (err, res) => {
     if (err) return cb(err)
     cb(null, parseInt(res, 16))
@@ -124,7 +117,7 @@ function fetchAtomRate (address, cb) {
 }
 
 // fetch the total raised and total atoms
-function fetchTotals (address, cb) {
+function ethFetchTotals (address, cb) {
   let divisor = 1e18
   ethCall(address, 'totalAtom', (err, res) => {
     if (err) return cb(err)
@@ -137,17 +130,15 @@ function fetchTotals (address, cb) {
   })
 }
 
-// TODO: limit so it doesn't fetch all txs
-function fetchTxs (address, cb) {
-  esiRequest('api?module=account&action=txlist', {
-    address,
-    startblock: 0,
-    endblock: 99999999,
-    sort: 'desc'
-  }, (err, res) => {
-    if (err) return cb(err)
-    cb(null, res.result)
-  })
+// ------------------------
+// network requests
+
+function fetchAtomRate (address, cb) {
+  ethFetchAtomRate(address, cb)
+}
+
+function fetchTotals (address, cb) {
+  ethFetchTotals(address, cb)
 }
 
 module.exports = {
@@ -155,9 +146,9 @@ module.exports = {
   getTransaction,
   getTransactionData,
   addressChecksum,
+
   fetchAtomRate,
   fetchTotals,
-  fetchTxs,
   FUNDRAISER_CONTRACT,
   MIN_DONATION
 }

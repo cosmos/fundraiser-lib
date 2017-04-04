@@ -1,8 +1,9 @@
 'use strict'
 
 const request = require('request')
+const { BASE_URL } = require('./util.js')
 
-const STATUS_URL = 'http://192.241.203.245:8080/status.json'
+const STATUS_URL = `${BASE_URL}/status.json`
 
 module.exports = function (cb) {
   request({
