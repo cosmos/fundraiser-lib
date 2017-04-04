@@ -200,13 +200,19 @@ function fetchFeeRate (cb) {
     json: true
   }, (err, res, body) => {
     if (err || res.statusCode !== 200) {
-      return cb(err || Error(res.statusCode), body)
+      // return cb(err || Error(res.statusCode), body)
+      // By default, pay 400
+      return cb(null, 400)
     }
-    let feeRate = body.halfHourFee
-    if (feeRate < 150 || feeRate > 1000) {
-      return cb(Error('Fee rate out of range'))
+    // Pay double the fee.
+    let feeRate = body.halfHourFee * 2
+    if (feeRate < 300) {
+      return cb(null, 300)
     }
-    cb(null, body.halfHourFee)
+    if (feeRate > 1000) {
+      return cb(null, 1000)
+    }
+    cb(null, feeRate)
   })
 }
 
