@@ -37,6 +37,8 @@ contract Fundraiser {
     uint public totalWei = 0;
     // The total amount of atoms suggested for allocation
     uint public totalAtom = 0;
+    // The number of donation
+    uint public numDonations = 0;
 
     /// Constructor. `_admin` has the ability to pause the
     /// contribution period and, eventually, kill this contract. `_treasury`
@@ -87,6 +89,7 @@ contract Fundraiser {
 	// update the totals
         totalWei += msg.value;
 	totalAtom += atoms;
+	numDonations += 1;
 
         Received(_donor, _returnAddress, msg.value, weiPerAtom);
     }

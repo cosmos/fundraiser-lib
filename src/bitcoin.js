@@ -136,12 +136,13 @@ function createFinalTx (inputs, feeRate) {
 
   // pay to exodus address, spendable by Cosmos developers
   let payToExodus = address.toOutputScript(EXODUS_ADDRESS)
-  tx.addOutput(payToExodus, inputAmount - MINIMUM_OUTPUT)
+  tx.addOutput(payToExodus, inputAmount)
 
-  // output to specify the Cosmos address. we set the address
+  // OP_RETURN data output to specify user's Cosmos address
+  // this output has a value of 0. we set the address
   // when we sign the transaction
-  let cosmosAddressScript = script.pubKeyHashOutput(Buffer(20).fill(0))
-  tx.addOutput(cosmosAddressScript, MINIMUM_OUTPUT)
+  let cosmosAddressScript = script.nullDataOutput(Buffer(20).fill(0))
+  tx.addOutput(cosmosAddressScript, 0)
 
   // deduct fee from exodus output
   let txLength = tx.byteLength() + tx.ins.length * 107 // account for input scripts
@@ -167,7 +168,7 @@ function signFinalTx (wallet, tx) {
 
   // set output script to specify user's Cosmos address
   let cosmosAddress = Buffer(wallet.addresses.cosmos.slice(2), 'hex')
-  let cosmosAddressScript = script.pubKeyHashOutput(cosmosAddress)
+  let cosmosAddressScript = script.nullDataOutput(cosmosAddress)
   tx.outs[1].script = cosmosAddressScript
 
   // all utxos we spend from should have used this script
