@@ -72,6 +72,11 @@ contract Fundraiser {
     /// Period restarted after abnormal halt.
     event Unhalted();
 
+    // Is the fundraiser active?
+    function isActive() returns (bool active) {
+	return (block.number >= beginBlock && block.number < endBlock && !isHalted);
+    }
+
     /// Receive a contribution for a donor cosmos address.
     function donate(address _donor, address _returnAddress, bytes4 checksum) payable only_during_period is_not_dust {
 	// checksum is the first 4 bytes of the sha3 of the xor of the bytes32 versions of the cosmos address and the return address

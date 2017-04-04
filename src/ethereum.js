@@ -142,6 +142,7 @@ ethMethodSig('weiPerAtom')
 ethMethodSig('totalAtom')
 ethMethodSig('totalWei')
 ethMethodSig('numDonations')
+ethMethodSig('isActive')
 */
 
 // ------------------------

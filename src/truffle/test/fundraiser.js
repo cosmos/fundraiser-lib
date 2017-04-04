@@ -49,6 +49,54 @@ contract('Fundraiser', function(accounts) {
   treasury = accounts[1];
   otherAccount = accounts[2];
 
+  it("should only be active during the period and when not halted", function() {
+    var meta;
+
+    blockNum = web3.eth.blockNumber
+    console.log("Height for test", blockNum);
+    console.log("period begins at", blockNum+beginBlockIn);
+    console.log("period ends at", blockNum+endBlockIn);
+
+    return Fundraiser.deployed().then(function(instance) {
+      meta = instance;
+
+      console.log("blockNum", web3.eth.blockNumber);
+      // not active before the period 
+      return meta.isActive.call();
+    }).then(function(returnValue) {
+	    assert.equal(false, returnValue, "isActive should be false before period")
+
+	    // send some txs to get the fundraiser started
+	    meta.isActive();
+    	    meta.isActive();
+    	    return meta.isActive.call();
+    }).then(function(returnValue){
+	    assert.equal(true, returnValue, "isActive should be true during the period")
+	    
+	    // halt the fundraiser
+	    meta.halt({from:admin}); 
+    	    return meta.isActive.call();
+    }).then(function(returnValue){
+	    assert.equal(false, returnValue, "isActive should be false while halted")
+	    meta.unhalt({from:admin}); 
+    	    return meta.isActive.call();
+    }).then(function(returnValue){
+	    assert.equal(true, returnValue, "isActive should be true during the period")
+    	    meta.isActive();
+    	    meta.isActive();
+    	    return meta.isActive.call();
+    }).then(function(returnValue){
+	    assert.equal(false, returnValue, "isActive should be false after period")
+    });
+  });
+});
+
+
+contract('Fundraiser', function(accounts) {
+  admin = accounts[0];
+  treasury = accounts[1];
+  otherAccount = accounts[2];
+
   it("should only let the admin halt, and only during the period", function() {
     var meta;
 
