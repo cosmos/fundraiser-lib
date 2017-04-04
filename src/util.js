@@ -7,7 +7,7 @@ if (process.env.COSMOS_BASE_URL) {
 } else if (process.browser) {
   BASE_URL = window.location.origin
 } else {
-  BASE_URL = 'https://cosmos.interblock.io'
+  BASE_URL = 'https://fundraiser.cosmos.network' // 'cosmos.interblock.io'
 }
 
 function byte (n) {
