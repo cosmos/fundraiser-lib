@@ -73,7 +73,7 @@ contract Fundraiser {
     event Unhalted();
 
     // Is the fundraiser active?
-    function isActive() returns (bool active) {
+    function isActive() constant returns (bool active) {
 	return (block.number >= beginBlock && block.number < endBlock && !isHalted);
     }
 

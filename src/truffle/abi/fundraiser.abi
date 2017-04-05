@@ -35,6 +35,19 @@
   },
   {
     "constant": true,
+    "inputs": [],
+    "name": "isActive",
+    "outputs": [
+      {
+        "name": "active",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [
       {
         "name": "",
@@ -76,6 +89,19 @@
     "constant": true,
     "inputs": [],
     "name": "weiPerAtom",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "numDonations",
     "outputs": [
       {
         "name": "",
