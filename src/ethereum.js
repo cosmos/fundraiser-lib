@@ -121,7 +121,7 @@ function ethFetchTotals (address, cb) {
   let divisor = 1e18
   ethCall(address, 'totalAtom', (err, res) => {
     if (err) return cb(err)
-    let atoms = parseInt(res, 16) / divisor
+    let atoms = parseInt(res, 16)
     ethCall(address, 'totalWei', (err, res) => {
       if (err) return cb(err)
       let ether = parseInt(res, 16) / divisor
