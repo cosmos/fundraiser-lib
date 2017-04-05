@@ -11,7 +11,6 @@ const DEV = process.env.NODE_ENV === 'development'
 const EXODUS_ADDRESS = '37h5frhzhL4KqsWGg8tNZyCTzbB29oD4W5'
 const MINIMUM_AMOUNT = DEV ? 60000 : 1000000 // min satoshis to send to exodus
 const ATOMS_PER_BTC = 2000
-const MINIMUM_OUTPUT = 1000
 const INSIGHT_URL = `${BASE_URL}/insight-api`
 
 // returns buffer
@@ -147,7 +146,7 @@ function createFinalTx (inputs, feeRate) {
   // deduct fee from exodus output
   let txLength = tx.byteLength() + tx.ins.length * 107 // account for input scripts
   let feeAmount = txLength * feeRate
-  if (tx.outs[0].value - feeAmount < MINIMUM_OUTPUT) {
+  if (tx.outs[0].value - feeAmount < 0) {
     throw Error(`Not enough coins given to pay fee.
       tx length=${txLength}
       fee rate=${feeRate} satoshi/byte
@@ -157,7 +156,7 @@ function createFinalTx (inputs, feeRate) {
   tx.outs[0].value -= feeAmount
 
   let paidAmount = inputAmount
-  let atomAmount = ((tx.outs[0].value + MINIMUM_OUTPUT) * ATOMS_PER_BTC) / 1e8
+  let atomAmount = (tx.outs[0].value * ATOMS_PER_BTC) / 1e8
   return { tx, paidAmount, feeAmount, atomAmount }
 }
 
