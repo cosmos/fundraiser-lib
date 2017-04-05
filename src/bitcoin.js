@@ -240,6 +240,5 @@ module.exports = {
   fetchFeeRate,
   fetchFundraiserStats,
   MINIMUM_AMOUNT,
-  MINIMUM_OUTPUT,
   ATOMS_PER_BTC
 }
