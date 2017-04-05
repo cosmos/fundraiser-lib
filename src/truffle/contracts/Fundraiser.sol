@@ -11,7 +11,7 @@ contract Fundraiser {
 
 
     // How much is enough?
-    uint public constant dust = 1 finney; // XXX: change for production
+    uint public constant dust = 180 finney;
 
 
     // Special addresses: 
