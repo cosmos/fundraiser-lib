@@ -16,7 +16,7 @@ function generateMnemonic () {
   let entropyBuf = new Buffer(entropyHex, 'hex')
   // console.log("before", entropyBuf, mnemonic)
   let salt = sha2(entropySalt)
-  salt = salt.slice(0,16)
+  salt = salt.slice(0, 16)
   // console.log("salt", salt)
   entropyBuf = xor(entropyBuf, new Buffer(salt))
   entropyHex = entropyBuf.toString('hex')

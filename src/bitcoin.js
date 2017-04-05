@@ -219,7 +219,7 @@ function fetchFundraiserStats (cb) {
     insightRequest('GET', `addr/${EXODUS_ADDRESS}`, null, (err, res) => {
       if (err) return cb(err)
       cb(null, {
-	amountDonated: amountDonated / 1e8,
+        amountDonated: amountDonated / 1e8,
         amountClaimed: amountDonated * ATOMS_PER_BTC / 1e8,
         txCount: res.txApperances
       })
