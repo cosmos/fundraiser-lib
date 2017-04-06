@@ -10,7 +10,7 @@ const { BASE_URL, byte, concat } = require('./util.js')
 const DEV = process.env.NODE_ENV === 'development'
 const EXODUS_ADDRESS = '35ty8iaSbWsj4YVkoHzs9pZMze6dapeoZ8'
 const MINIMUM_AMOUNT = DEV ? 60000 : 1000000 // min satoshis to send to exodus
-const ATOMS_PER_BTC = 11208
+const ATOMS_PER_BTC = 11635
 const INSIGHT_URL = `${BASE_URL}/insight-api`
 
 // returns buffer
