@@ -62,6 +62,9 @@ function deriveMasterKey (mnemonic) {
     throw Error('Mnemonic must be at least 12 words')
   }
 
+  // throws if mnemonic is invalid
+  bip39.mnemonicToEntropy(mnemonic)
+
   var seed = bip39.mnemonicToSeed(mnemonic)
   var masterKey = HDNode.fromSeedBuffer(seed)
   return masterKey
