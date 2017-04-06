@@ -118,6 +118,18 @@ test('derive wallet keys/addresses', function (t) {
     t.end()
   })
 
+  t.test('derive with invalid 12-word mnemonic', function (t) {
+    try {
+      var badMnemonic = 'xxxfaint person illness welcome clump oil acoustic cycle common dash also essay'
+      cfr.deriveWallet(badMnemonic)
+      t.fail('should have thrown')
+    } catch (err) {
+      t.ok(err, 'error was thrown')
+      t.equal(err.message, 'Invalid mnemonic', 'correct error message')
+    }
+    t.end()
+  })
+
   t.end()
 })
 
