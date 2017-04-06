@@ -152,7 +152,7 @@ test('createFinalTx', function (t) {
     t.ok(tx.tx, 'has tx property')
     t.equal(tx.paidAmount, 1000000, 'correct paidAmount')
     t.equal(tx.feeAmount, 48620, 'correct feeAmount')
-    t.equal(tx.atomAmount, 19.0276, 'correct atomAmount')
+    t.equal(tx.atomAmount, 106.6306704, 'correct atomAmount')
     t.end()
   })
 
