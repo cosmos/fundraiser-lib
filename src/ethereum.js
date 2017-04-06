@@ -187,6 +187,7 @@ module.exports = {
   getTransactionData,
   addressChecksum,
 
+  ethCall,
   fetchAtomRate,
   fetchTotals,
   fetchNumDonations,

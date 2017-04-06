@@ -230,6 +230,7 @@ function fetchFundraiserStats (cb) {
 module.exports = {
   getAddress160,
   getAddress,
+  insightRequest,
   fetchUtxos,
   insightFetchUtxos,
   pushTx,
