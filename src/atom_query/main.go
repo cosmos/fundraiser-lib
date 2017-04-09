@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -41,7 +42,7 @@ var (
 	CSVFlag       bool
 	BadFlag       bool
 	OverLimitFlag bool
-	GenesisFlag   bool
+	BuildFlag     bool
 )
 
 // Database
@@ -109,6 +110,18 @@ func loadDonations(f string) error {
 
 		atomsMap[d.Address] = totalDonationInfo
 	}
+
+	// Round atoms
+	for addr, info := range atomsMap {
+		info.Atom = info.Atom
+		atomS := fmt.Sprintf("%.2f", info.Atom)
+		info.Atom, err = strconv.ParseFloat(atomS, 64)
+		if err != nil {
+			panic(err)
+		}
+		atomsMap[addr] = info
+	}
+
 	return nil
 }
 
@@ -136,7 +149,7 @@ func main() {
 	flag.BoolVar(&CSVFlag, "csv", false, "list the sorted percentage atoms in csv")
 	flag.BoolVar(&BadFlag, "bad", false, "list txs that were late")
 	flag.BoolVar(&OverLimitFlag, "limit", false, "list accounts that went over the limit")
-	flag.BoolVar(&GenesisFlag, "genesis", false, "output preliminary genesis.json not including prefunders")
+	flag.BoolVar(&BuildFlag, "build", false, "output preliminary fundraiser_atoms.json not including prefunders")
 	flag.Parse()
 
 	if err := loadDonations(DonationsJSON); err != nil {
@@ -154,8 +167,8 @@ func main() {
 		printBadTxs()
 	} else if OverLimitFlag {
 		printOverLimit()
-	} else if GenesisFlag {
-		printGenesis()
+	} else if BuildFlag {
+		printBuild()
 	} else {
 		fmt.Println("Listening on port", ListeningPort)
 		http.HandleFunc("/atoms/", queryAtoms)
@@ -214,7 +227,7 @@ func printList() {
 	}
 }
 
-func printGenesis() {
+func printBuild() {
 	_, _, _, accounts := sumAccounts()
 	b, err := json.MarshalIndent(accounts, "", "\t")
 	if err != nil {
