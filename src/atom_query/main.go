@@ -34,14 +34,14 @@ var (
 // Flags
 var (
 	ListeningPort int
-	EthJSON       string
-	BtcJSON       string
+	DonationsJSON string
 
 	StatsFlag     bool
 	ListFlag      bool
 	CSVFlag       bool
 	BadFlag       bool
 	OverLimitFlag bool
+	GenesisFlag   bool
 )
 
 // Database
@@ -124,26 +124,22 @@ func (ab AtomBalances) Swap(i, j int) {
 }
 
 type Account struct {
-	Address string
-	Amount  float64
+	Address string  `json:"address"`
+	Amount  float64 `json:"balance"`
 }
 
 func main() {
 	flag.IntVar(&ListeningPort, "port", 8080, "listening port")
-	flag.StringVar(&EthJSON, "eth", "data/eth.json", "file containing json list of eth donations")
-	flag.StringVar(&BtcJSON, "btc", "data/btc.json", "file containing json list of btc donations")
+	flag.StringVar(&DonationsJSON, "donations", "data/donations.json", "file containing json list of all donations")
 	flag.BoolVar(&StatsFlag, "stats", false, "dump the stats and exit")
 	flag.BoolVar(&ListFlag, "list", false, "list the sorted addresses and exit")
 	flag.BoolVar(&CSVFlag, "csv", false, "list the sorted percentage atoms in csv")
 	flag.BoolVar(&BadFlag, "bad", false, "list txs that were late")
 	flag.BoolVar(&OverLimitFlag, "limit", false, "list accounts that went over the limit")
+	flag.BoolVar(&GenesisFlag, "genesis", false, "output preliminary genesis.json not including prefunders")
 	flag.Parse()
 
-	if err := loadDonations(EthJSON); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	if err := loadDonations(BtcJSON); err != nil {
+	if err := loadDonations(DonationsJSON); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -158,6 +154,8 @@ func main() {
 		printBadTxs()
 	} else if OverLimitFlag {
 		printOverLimit()
+	} else if GenesisFlag {
+		printGenesis()
 	} else {
 		fmt.Println("Listening on port", ListeningPort)
 		http.HandleFunc("/atoms/", queryAtoms)
@@ -214,6 +212,16 @@ func printList() {
 	for i, acc := range accounts {
 		fmt.Println(i, acc.Address, 100*acc.Amount/totalAtom)
 	}
+}
+
+func printGenesis() {
+	_, _, _, accounts := sumAccounts()
+	b, err := json.MarshalIndent(accounts, "", "\t")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	fmt.Println(string(b))
 }
 
 func printCSV() {
