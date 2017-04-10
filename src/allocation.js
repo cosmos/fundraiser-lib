@@ -1,8 +1,10 @@
 
 const request = require('request')
 const { BASE_URL } = require('./util.js')
+const fundraiserAtoms = require('./atom_query/data/fundraiser_atoms.json')
+const status = require('./atom_query/data/status.json')
 
-function fetchSuggestedAtoms(addr, cb) {
+function fetchSuggestedAtoms (addr, cb) {
   return request({
     method: 'GET',
     url: `${BASE_URL}/atoms/${addr}`,
@@ -22,5 +24,7 @@ function fetchSuggestedAtoms(addr, cb) {
 }
 
 module.exports = {
-  fetchSuggestedAtoms
+  fetchSuggestedAtoms,
+  fundraiserAtoms,
+  status
 }
