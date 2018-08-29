@@ -1,30 +1,5 @@
-{
-  "pub_key": {
-    "type": "tendermint/PubKeySecp256k1",
-	"value": "Aoz3fddaojJgTS6pBmRLOVkO5QXR/6r1nAK0BLbjjxi+"
-  }
-},
-{
-  "pub_key": {
-    "type": "tendermint/PubKeySecp256k1",
-	"value": "AqveSfxRiCGhmub02+U6PfZtSkm7zoJTRGFnW+QS3J3z"
-  }
-},
-{
-  "pub_key": {
-    "type": "tendermint/PubKeySecp256k1",
-	"value": "AzFT6DsBiCAt3Jgju2YanUFWphBG+F2KzWz32Dy+4Ykr"
-  }
-},
-{
-  "pub_key": {
-    "type": "tendermint/PubKeySecp256k1",
-	"value": "Agrqb2Kjr8rmzZrdIhjqRLWHQaRpK9TVvhkKs3xB4BlB"
-  }
-},
-{
-  "pub_key": {
-    "type": "tendermint/PubKeySecp256k1",
-	"value": "AmByXogrfBFIEC0/+3+N45/bB1aCU9oIzWACvv8rlaAs"
-  }
-},
+cosmospub1addwnpepq2x0wlwht23ryczd965svezt89vsaeg968l64avuq26qfdhr3uvtu32vq0g
+cosmospub1addwnpepq24auj0u2xyzrgv6um6dhef68hmx6jjfh08gy56yv9n4heqjmjwlxagn3hu
+cosmospub1addwnpepqvc486pmqxyzqtwunq3mkes6n4q4dfssgmu9mzkddnmas097uxyjk8rcytp
+cosmospub1addwnpepqg9w5mmz5whu4ekdntwjyx82gj6cwsdydy4af4d7ry9txlzpuqv5zp6v9w6
+cosmospub1addwnpepqfs8yh5g9d7pzjqs95llkluduw0akp6ksffa5zxdvqptaletjkszclrr65t

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/tendermint/go-amino"
+	camino "github.com/tendermint/tendermint/crypto/encoding/amino"
 	"github.com/tendermint/tendermint/libs/bech32"
 )
 
@@ -18,18 +19,13 @@ func init() {
 	cdc = amino.NewCodec()
 }
 
-func bech32ToBech32(bech32str string) ([]byte, string) {
+func parseBech32(bech32str string) []byte {
 	_, bz, err := bech32.DecodeAndConvert(bech32str)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error decoding bech32: %s\n", err)
 		panic(err)
 	}
-	// fmt.Printf("cosmos acc pubkey hex: %X\n", bz)
-	bech32str2, err := bech32.ConvertAndEncode("cosmospub", bz)
-	if err != nil {
-		panic(err)
-	}
-	return bz, bech32str2
+	return bz
 }
 
 func main() {
@@ -55,7 +51,17 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		_, b64pub := bech32ToBech32(b32pub)
-		fmt.Printf("\"%v\":%v\n", b64pub, amntf)
+		bz := parseBech32(b32pub)
+		pub, err := camino.PubKeyFromBytes(bz)
+		if err != nil {
+			panic(err)
+		}
+		addr := pub.Address()
+		b32addr, err := bech32.ConvertAndEncode("cosmos", addr)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Printf("\"%v\":%v\n", b32addr, amntf)
 	}
 }

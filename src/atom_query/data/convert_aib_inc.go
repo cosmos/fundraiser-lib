@@ -17,23 +17,24 @@ func init() {
 	cdc = amino.NewCodec()
 }
 
-func bech32ToBase64(bech32str string) ([]byte, string) {
+func bech32ToBech32(bech32str string) ([]byte, string) {
 	_, bz, err := bech32.DecodeAndConvert(bech32str)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error decoding bech32: %s\n", err)
 		panic(err)
 	}
 	if len(bz) == 38 {
-		bz = bz[5:]
-	} else if len(bz) != 33 {
+		// good.
+	} else if len(bz) == 33 {
+		bz = append([]byte{0xEB, 0x5A, 0xE9, 0x87, 0x21}, bz...)
+	} else {
 		panic("unexpected pubbz length")
 	}
-	b64strbz, err := amino.MarshalJSON(bz)
+	bech32str2, err := bech32.ConvertAndEncode("cosmospub", bz)
 	if err != nil {
 		panic(err)
 	}
-	b64str := string(b64strbz[1 : len(b64strbz)-1])
-	return bz, b64str
+	return bz, bech32str2
 }
 
 func main() {
@@ -49,13 +50,7 @@ func main() {
 			continue
 		}
 		b32pub := part
-		_, b64pub := bech32ToBase64(b32pub)
-		fmt.Printf(`{
-  "pub_key": {
-    "type": "tendermint/PubKeySecp256k1",
-	"value": "%v"
-  }
-},
-`, b64pub)
+		_, b32pub2 := bech32ToBech32(b32pub)
+		fmt.Println(b32pub2)
 	}
 }
