@@ -18,18 +18,18 @@ func init() {
 	cdc = amino.NewCodec()
 }
 
-func bech32ToBase64(bech32str string) ([]byte, string) {
+func bech32ToBech32(bech32str string) ([]byte, string) {
 	_, bz, err := bech32.DecodeAndConvert(bech32str)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error decoding bech32: %s\n", err)
 		panic(err)
 	}
-	b64strbz, err := amino.MarshalJSON(bz)
+	// fmt.Printf("cosmos acc pubkey hex: %X\n", bz)
+	bech32str2, err := bech32.ConvertAndEncode("cosmospub", bz)
 	if err != nil {
 		panic(err)
 	}
-	b64str := string(b64strbz[1 : len(b64strbz)-1])
-	return bz, b64str
+	return bz, bech32str2
 }
 
 func main() {
@@ -55,7 +55,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		_, b64pub := bech32ToBase64(b32pub)
+		_, b64pub := bech32ToBech32(b32pub)
 		fmt.Printf("\"%v\":%v\n", b64pub, amntf)
 	}
 }
