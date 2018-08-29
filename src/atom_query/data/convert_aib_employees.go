@@ -61,6 +61,6 @@ func main() {
 			panic(err)
 		}
 
-		fmt.Printf("{\"addr\":\"%v\",\"amount\":%v},\n", b32addr, amntf)
+		fmt.Printf("{\"addr\":\"%v\",\"amount\":%v,\"lock\":\"1 year\",\"vesting\":\"2 years\"},\n", b32addr, amntf)
 	}
 }
