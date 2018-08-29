@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/tendermint/go-amino"
@@ -49,8 +50,17 @@ func main() {
 		if strings.TrimSpace(part) == "" {
 			continue
 		}
-		b32pub := part
+		pparts := strings.Split(part, ",")
+		if len(pparts) != 2 {
+			panic("expected format of b32addressish,number")
+		}
+		b32pub := pparts[0]
+		amnt := pparts[1]
+		amntf, err := strconv.ParseFloat(amnt, 64)
+		if err != nil {
+			panic(err)
+		}
 		_, b32pub2 := bech32ToBech32(b32pub)
-		fmt.Println(b32pub2)
+		fmt.Printf(`%v,%.2f`+"\n", b32pub2, amntf)
 	}
 }
