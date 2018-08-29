@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/tendermint/go-amino"
+	camino "github.com/tendermint/tendermint/crypto/encoding/amino"
 	"github.com/tendermint/tendermint/libs/bech32"
 )
 
@@ -51,16 +52,30 @@ func main() {
 			continue
 		}
 		pparts := strings.Split(part, ",")
-		if len(pparts) != 2 {
-			panic("expected format of b32addressish,number")
+		if len(pparts) != 3 {
+			panic("expected format of type,b32addressish,number")
 		}
-		b32pub := pparts[0]
-		amnt := pparts[1]
+		typ := pparts[0]
+		b32pub := pparts[1]
+		amnt := pparts[2]
 		amntf, err := strconv.ParseFloat(amnt, 64)
 		if err != nil {
 			panic(err)
 		}
-		_, b32pub2 := bech32ToBech32(b32pub)
-		fmt.Printf(`{"pub":"%v","amount":%.2f},`+"\n", b32pub2, amntf)
+		bz, b32pub2 := bech32ToBech32(b32pub)
+		if typ == "a" {
+			pub, err := camino.PubKeyFromBytes(bz)
+			if err != nil {
+				panic(err)
+			}
+			addr := pub.Address()
+			b32addr, err := bech32.ConvertAndEncode("cosmos", addr)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Printf(`{"addr":"%v","amount":%.2f},`+"\n", b32addr, amntf)
+		} else if typ == "p" {
+			fmt.Printf(`{"pub":"%v","amount":%.2f},`+"\n", b32pub2, amntf)
+		}
 	}
 }
