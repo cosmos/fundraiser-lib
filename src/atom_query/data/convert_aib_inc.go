@@ -61,6 +61,6 @@ func main() {
 			panic(err)
 		}
 		_, b32pub2 := bech32ToBech32(b32pub)
-		fmt.Printf(`%v,%.2f`+"\n", b32pub2, amntf)
+		fmt.Printf(`{"pub":"%v","amount":%.2f},`+"\n", b32pub2, amntf)
 	}
 }

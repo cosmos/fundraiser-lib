@@ -35,7 +35,6 @@ func main() {
 	}
 	str := string(bz)
 	parts := strings.Split(str, "\n")
-	fmt.Println(len(parts), parts[:2], parts[len(parts)-2:], len(parts))
 
 	for _, part := range parts {
 		if strings.TrimSpace(part) == "" {
@@ -62,6 +61,6 @@ func main() {
 			panic(err)
 		}
 
-		fmt.Printf("\"%v\":%v\n", b32addr, amntf)
+		fmt.Printf("{\"addr\":\"%v\",\"amount\":%v},\n", b32addr, amntf)
 	}
 }
