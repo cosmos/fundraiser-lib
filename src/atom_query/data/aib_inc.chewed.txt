@@ -1,0 +1,30 @@
+{
+  "pub_key": {
+    "type": "tendermint/PubKeySecp256k1",
+	"value": "Aoz3fddaojJgTS6pBmRLOVkO5QXR/6r1nAK0BLbjjxi+"
+  }
+},
+{
+  "pub_key": {
+    "type": "tendermint/PubKeySecp256k1",
+	"value": "AqveSfxRiCGhmub02+U6PfZtSkm7zoJTRGFnW+QS3J3z"
+  }
+},
+{
+  "pub_key": {
+    "type": "tendermint/PubKeySecp256k1",
+	"value": "AzFT6DsBiCAt3Jgju2YanUFWphBG+F2KzWz32Dy+4Ykr"
+  }
+},
+{
+  "pub_key": {
+    "type": "tendermint/PubKeySecp256k1",
+	"value": "Agrqb2Kjr8rmzZrdIhjqRLWHQaRpK9TVvhkKs3xB4BlB"
+  }
+},
+{
+  "pub_key": {
+    "type": "tendermint/PubKeySecp256k1",
+	"value": "AmByXogrfBFIEC0/+3+N45/bB1aCU9oIzWACvv8rlaAs"
+  }
+},
