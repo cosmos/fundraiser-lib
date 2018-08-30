@@ -8,7 +8,7 @@
     "cosmospub1addwnpepqg9w5mmz5whu4ekdntwjyx82gj6cwsdydy4af4d7ry9txlzpuqv5zp6v9w6",
     "cosmospub1addwnpepqfs8yh5g9d7pzjqs95llkluduw0akp6ksffa5zxdvqptaletjkszclrr65t"
   ],
-  "amount":21837688.81,
+  "amount":21842188.81,
   "lock":"1 month",
   "vesting":"2 years"
 },
@@ -52,7 +52,7 @@
 {"addr":"cosmos1c3ynnn0ra95ehaakss2ultxf7tsw79j9yh8e3d","amount":22250,"lock":"1 year"},
 {"addr":"cosmos1x3aysmuw5aay9cwfpchacnhh9kqazec8uc0alv","amount":8000,"lock":"1 year"},
 {"addr":"cosmos1rwf9jukr8z0w0s9tqr7pyd23j8645whu8aj28f","amount":18500,"lock":"1 year"},
-{"addr":"cosmos17knx6xzq7l3sanrxymvpyep3nzumvmn6e4flec","amount":11000,"lock":"1 year"},
+{"addr":"cosmos17knx6xzq7l3sanrxymvpyep3nzumvmn6e4flec","amount":6500,"lock":"1 year"},
 {"addr":"cosmos1a9l4dq6s44k7dk4lx0us6g7xsunartz8rscnx3","amount":14750,"lock":"1 year"},
 {"addr":"cosmos1lcsjy2d5s33h0sddd8lpuqvwyz5ruz7jsfj43h","amount":5000,"lock":"1 year"},
 {"addr":"cosmos1skv2quty6zavcqfrnq746ll2pmyvj2739yy4gp","amount":18500,"lock":"1 year"},
