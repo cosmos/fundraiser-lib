@@ -73,7 +73,7 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			fmt.Printf(`{"addr":"%v","amount":%.2f,"lock":"1 year","vesting":"2 years"},`+"\n", b32addr, amntf)
+			fmt.Printf(`{"addr":"%v","amount":%.2f,"lock":"1 year"},`+"\n", b32addr, amntf)
 		} else if typ == "p" {
 			fmt.Printf(`{"pub":"%v","amount":%.2f},`+"\n", b32pub2, amntf)
 		}
