@@ -89,13 +89,15 @@ func loadDonations(f string) error {
 	for _, d := range donationsArray {
 		if d.Error != "" {
 			if d.BlockHeight == 460661 {
-				// is good
-			} else if d.Error == "Block too late" {
-				lateDonations = append(lateDonations, d)
-			} else {
-				continue
+				// We changed policy to include 661
+				goto GOOD
 			}
+			if d.Error == "Block too late" {
+				lateDonations = append(lateDonations, d)
+			}
+			continue
 		}
+	GOOD:
 
 		totalDonationInfo := atomsMap[d.Address]
 
@@ -124,11 +126,10 @@ func loadDonations(f string) error {
 	// Round atoms
 	for addr, info := range atomsMap {
 		info.BTC.Atom = round2(info.BTC.Atom)
-		info.ETH.Atom = info.ETH.Atom // is already whole amount.
+		// info.ETH.Atom is already whole value.
 		info.Atom = info.BTC.Atom + info.ETH.Atom
 		atomsMap[addr] = info
 
-		// strip trailing 0's
 		atomAmount := fmt.Sprintf("%.2f", info.Atom)
 		if atomAmount[len(atomAmount)-1] == '0' {
 			atomAmount = atomAmount[:len(atomAmount)-1]
