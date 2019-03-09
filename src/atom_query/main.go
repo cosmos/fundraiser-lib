@@ -17,10 +17,10 @@ import (
 var (
 	EarlyDonorsUSD = 300000
 
-	PreContribAtoms float64 = 16856718
+	PreContribAtoms float64 = 16856718.97
 	PreContribUSD   float64 = 1329472
 
-	FoundersInflate = 1.33333333
+	FoundersInflate = 1.33333333333333
 )
 
 // Price info
@@ -205,7 +205,10 @@ func sumAccounts() (totalEth, totalBtc, totalAtom float64, accounts AtomBalances
 		totalAtom += info.Atom
 		accounts = append(accounts, Account{addr, info.Atom})
 	}
-	fmt.Println("totalAtom", totalAtom)
+	totalAtom = round2(totalAtom)
+	totalBtcAtom = round2(totalBtcAtom)
+	totalEthAtom = round2(totalEthAtom)
+	fmt.Println("totalAtom (minux prefundraiser)", totalAtom)
 	fmt.Println("totalBtcAtom", totalBtcAtom)
 	fmt.Println("totalEthAtom", totalEthAtom)
 
