@@ -52,14 +52,15 @@ var (
 )
 
 type TotalDonationInfo struct {
-	BTC  CoinDonationInfo `json:"btc"`  // total btc donated
-	ETH  CoinDonationInfo `json:"eth"`  // total eth donated
-	Atom float64          `json:"atom"` // total suggested atom allocated
+	BTC  CoinDonationInfo `json:"btc"` // total btc donated
+	ETH  CoinDonationInfo `json:"eth"` // total eth donated
+	Atom float64          `json"atom"` // total atom suggested
 }
 
 type CoinDonationInfo struct {
 	Num   int     `json:"num"`   // number of donations
 	Total float64 `json:"total"` // total donated in this coin
+	Atom  float64 `json:"atom"`  // suggested atom for this coin
 }
 
 // Raw JSON data
@@ -87,10 +88,13 @@ func loadDonations(f string) error {
 
 	for _, d := range donationsArray {
 		if d.Error != "" {
-			if d.Error == "Block too late" {
+			if d.BlockHeight == 460661 {
+				// is good
+			} else if d.Error == "Block too late" {
 				lateDonations = append(lateDonations, d)
+			} else {
+				continue
 			}
-			continue
 		}
 
 		totalDonationInfo := atomsMap[d.Address]
@@ -99,27 +103,40 @@ func loadDonations(f string) error {
 		case "btc":
 			totalDonationInfo.BTC.Num += 1
 			totalDonationInfo.BTC.Total += d.Amount
+			totalDonationInfo.BTC.Atom += d.Amount * AtomPerBtc
 		case "eth":
 			totalDonationInfo.ETH.Num += 1
 			totalDonationInfo.ETH.Total += d.Amount
+			totalDonationInfo.ETH.Atom += float64(int64(d.Amount*AtomPerEth + 0.00000001))
 		default:
 			panic(fmt.Sprintf("%v", d))
 		}
 
-		totalDonationInfo.Atom += d.Atoms
-
 		atomsMap[d.Address] = totalDonationInfo
 	}
 
+	// refund whale
+	x := atomsMap["aff9f5a716cdd701304eae6fc7f42c80fdeea584"]
+	x.ETH.Total -= (809200 / 45.23)
+	x.ETH.Atom -= 8092000
+	atomsMap["aff9f5a716cdd701304eae6fc7f42c80fdeea584"] = x
+
 	// Round atoms
 	for addr, info := range atomsMap {
-		info.Atom = info.Atom
-		atomS := fmt.Sprintf("%.2f", info.Atom)
-		info.Atom, err = strconv.ParseFloat(atomS, 64)
-		if err != nil {
-			panic(err)
-		}
+		info.BTC.Atom = round2(info.BTC.Atom)
+		info.ETH.Atom = info.ETH.Atom // is already whole amount.
+		info.Atom = info.BTC.Atom + info.ETH.Atom
 		atomsMap[addr] = info
+
+		// strip trailing 0's
+		atomAmount := fmt.Sprintf("%.2f", info.Atom)
+		if atomAmount[len(atomAmount)-1] == '0' {
+			atomAmount = atomAmount[:len(atomAmount)-1]
+			if atomAmount[len(atomAmount)-1] == '0' {
+				atomAmount = atomAmount[:len(atomAmount)-2]
+			}
+		}
+		fmt.Printf("\"%v\": %v,\n", addr, atomAmount)
 	}
 
 	return nil
@@ -178,12 +195,18 @@ func main() {
 }
 
 func sumAccounts() (totalEth, totalBtc, totalAtom float64, accounts AtomBalances) {
+	totalEthAtom, totalBtcAtom := float64(0), float64(0)
 	for addr, info := range atomsMap {
 		totalBtc += info.BTC.Total
+		totalBtcAtom += info.BTC.Atom
 		totalEth += info.ETH.Total
+		totalEthAtom += info.ETH.Atom
 		totalAtom += info.Atom
 		accounts = append(accounts, Account{addr, info.Atom})
 	}
+	fmt.Println("totalAtom", totalAtom)
+	fmt.Println("totalBtcAtom", totalBtcAtom)
+	fmt.Println("totalEthAtom", totalEthAtom)
 
 	sort.Sort(accounts)
 
@@ -300,4 +323,11 @@ func queryAtoms(w http.ResponseWriter, r *http.Request) {
 func httpError(w http.ResponseWriter, errStr string) {
 	w.WriteHeader(http.StatusBadRequest)
 	w.Write([]byte(errStr + "\n"))
+}
+
+// round to 2 decimal places
+func round2(x float64) (r float64) {
+	s := fmt.Sprintf("%.2f", x)
+	r, _ = strconv.ParseFloat(s, 64)
+	return
 }
